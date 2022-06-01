@@ -40,7 +40,7 @@ def init_image_container(parent_container):
     image_container = QLabel(parent_container)
     image_container.setObjectName("image_container")
     image_container.resize(int(parent_container.width() * 0.7), int(parent_container.height() * 0.7))
-    image_container.setStyleSheet(styles.image_container_style)
+    image_container.setStyleSheet(styles.main_label_style)
     image_container.move(int(parent_container.width() * 0.25), 10)
     return image_container
     
