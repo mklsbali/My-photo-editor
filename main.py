@@ -1,3 +1,4 @@
+import os.path
 import sys
 
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QFileDialog, QPushButton, QScrollBar, QListWidget, \
@@ -12,7 +13,8 @@ W_LEFT = 100
 W_TOP = 100
 W_WIDTH = 1366
 W_HEIGHT = 768
-TMP_IMAGE_PATH = './images/tmp.png'
+TMP_IMAGE_PATH = './tmp/'
+TMP_IMAGE_NAME = 'tmp.png'
 
 
 class App(QWidget):
@@ -192,8 +194,10 @@ class App(QWidget):
         self.image_label.move(int((self.image_container.width()-self.image_label.width())/2), 10)
 
     def load_filtered_image(self, filtered):
-        cv.imwrite(TMP_IMAGE_PATH, filtered)
-        self.image_path = TMP_IMAGE_PATH
+        if not os.path.exists(TMP_IMAGE_PATH):
+            os.mkdir(TMP_IMAGE_PATH)
+        self.image_path = os.path.join(TMP_IMAGE_PATH, TMP_IMAGE_NAME)
+        cv.imwrite(self.image_path, filtered)
         self.set_image_label()
 
     def add_filter(self, filter_nane, style, function):
