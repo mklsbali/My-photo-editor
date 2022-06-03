@@ -30,10 +30,17 @@ class App(QWidget):
         self.main_label1 = QLabel(self)  # image_container, upload and save buttons
         self.main_label2 = QLabel(self)  # filters
         self.main_label3 = QLabel(self)  # options, resize
+        # image container
         self.image_container = QLabel(self.main_label1)
         self.image_label = QLabel(self.image_container)
-        self.filter_container = QWidget(self.main_label2)
-        self.scroll_layout = None
+        # filter container
+        self.image_container = QLabel(self.main_label1)
+        self.image_label = QLabel(self.image_container)
+        self.filter_container = QWidget()
+        self.h_list_layout = QHBoxLayout()
+        self.scroll = QScrollArea()
+        self.scroll_content = QWidget()
+        self.scroll_layout = QHBoxLayout()
         self.tmp_img = None
         self.resize_input = QLineEdit()
         self.init_ui()
@@ -75,32 +82,6 @@ class App(QWidget):
         save_button.clicked.connect(self.save_image)
         save_button.move(self.image_container.width() - save_button.width(), self.image_container.height() + 5)
 
-    def init_main_label2(self):
-        """Filters"""
-        self.main_label2.setObjectName("main_label2")
-        self.main_label2.resize(int(self.width * 0.98), int(self.height * 0.25))
-        self.main_label2.move(int((self.width - self.main_label2.width()) / 2), self.image_container.height() + 50)
-        self.main_label2.setStyleSheet(styles.main_label2_style)
-
-        # Filter type
-        filter_type = QWidget(self.main_label2)
-        filter_type_layout = QHBoxLayout(filter_type)
-        filter_type.setLayout(filter_type_layout)
-        # Text
-        filter_type_text = QLabel()
-        filter_type_text.setText("Filter type")
-        # Grayscale filters button
-        grayscale_filters_b = QPushButton("Grayscale")
-        grayscale_filters_b.clicked.connect(self.load_grayscale_filters)
-        # Colorful filters button
-        colorful_filters_b = QPushButton("Colorful")
-        colorful_filters_b.clicked.connect(self.load_color_filters)
-        filter_type_layout.addWidget(filter_type_text)
-        filter_type_layout.addWidget(grayscale_filters_b)
-        filter_type_layout.addWidget(colorful_filters_b)
-
-        self.load_grayscale_filters()
-
     def init_main_label3(self):
         """Options"""
         self.main_label3.setObjectName("main_label3")
@@ -122,18 +103,55 @@ class App(QWidget):
         resize_container_layout.addWidget(resize_label)
         resize_container_layout.addWidget(resize_button)
 
+    def init_main_label2(self):
+        """Filters"""
+        self.main_label2.setObjectName("main_label2")
+        self.main_label2.resize(int(self.width * 0.98), int(self.height * 0.25))
+        self.main_label2.move(int((self.width - self.main_label2.width()) / 2), self.image_container.height() + 50)
+        self.main_label2.setStyleSheet(styles.main_label2_style)
+
+        # Filter type
+        filter_type = QWidget(self.main_label2)
+        filter_type_layout = QHBoxLayout(filter_type)
+        filter_type.setLayout(filter_type_layout)
+        # Text
+        filter_type_text = QLabel()
+        filter_type_text.setText("Filter type")
+        # Grayscale filters button
+        grayscale_filters_b = QPushButton("Grayscale")
+        grayscale_filters_b.clicked.connect(self.reload_grayscale_filters)
+        # Colorful filters button
+        colorful_filters_b = QPushButton("Colorful")
+        colorful_filters_b.clicked.connect(self.load_color_filters)
+        filter_type_layout.addWidget(filter_type_text)
+        filter_type_layout.addWidget(grayscale_filters_b)
+        filter_type_layout.addWidget(colorful_filters_b)
+
+        self.load_grayscale_filters()
+
+    def remove_filters(self):
+        print('Removing filters')
+
+
+    def reload_grayscale_filters(self):
+        print('Reload grayscale filters')
+
+    def reload_color_filters(self):
+        print('Reload color filters')
+
     def load_grayscale_filters(self):
         # Filter container
+        self.filter_container = QWidget(self.main_label2)
         self.filter_container.setObjectName("filter_container")
         self.filter_container.resize(int(self.main_label2.width()), int(self.main_label2.height() * 0.85))
         self.filter_container.move(0, 30)
-        h_list_layout = QHBoxLayout(self.filter_container)
-        self.filter_container.setLayout(h_list_layout)
-        scroll = QScrollArea(self.filter_container)
-        h_list_layout.addWidget(scroll)
-        scroll_content = QWidget(scroll)
-        self.scroll_layout = QHBoxLayout(scroll_content)
-        scroll_content.setLayout(self.scroll_layout)
+        self.h_list_layout = QHBoxLayout(self.filter_container)
+        self.filter_container.setLayout(self.h_list_layout)
+        self.scroll = QScrollArea(self.filter_container)
+        self.h_list_layout.addWidget(self.scroll)
+        self.scroll_content = QWidget(self.scroll)
+        self.scroll_layout = QHBoxLayout(self.scroll_content)
+        self.scroll_content.setLayout(self.scroll_layout)
 
         # Grayscale filter
         self.add_filter("Grayscale", styles.gs_button_style, self.set_grayscale_image)
@@ -144,7 +162,7 @@ class App(QWidget):
         for i in range(50):
             self.add_filter("Negative", styles.negative_button_style, self.set_negative_image)
 
-        scroll.setWidget(scroll_content)  # !!!important
+        self.scroll.setWidget(self.scroll_content)  # !!!important
 
     def load_color_filters(self):
         # Filter container
