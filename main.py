@@ -1,6 +1,7 @@
 import os.path
 import sys
 
+import PyQt5
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QFileDialog, QPushButton, QScrollBar, QListWidget, \
     QListWidgetItem, QHBoxLayout, QScrollArea, QVBoxLayout, QLineEdit
 from PyQt5.QtGui import QIcon, QPixmap
@@ -17,10 +18,17 @@ TMP_IMAGE_PATH = './tmp/'
 TMP_IMAGE_NAME = 'tmp.png'
 
 
+
 class App(QWidget):
 
     def __init__(self):
         super().__init__()
+        self.filter_widgets = {
+            "filter_texts": [],
+            "filter_buttons": [],
+            "filter_layouts": []
+        }
+
         self.title = 'My photo editor'
         self.left = W_LEFT
         self.top = W_TOP
@@ -122,25 +130,10 @@ class App(QWidget):
         grayscale_filters_b.clicked.connect(self.reload_grayscale_filters)
         # Colorful filters button
         colorful_filters_b = QPushButton("Colorful")
-        colorful_filters_b.clicked.connect(self.load_color_filters)
+        colorful_filters_b.clicked.connect(self.reload_color_filters)
         filter_type_layout.addWidget(filter_type_text)
         filter_type_layout.addWidget(grayscale_filters_b)
         filter_type_layout.addWidget(colorful_filters_b)
-
-        self.load_grayscale_filters()
-
-    def remove_filters(self):
-        print('Removing filters')
-
-
-    def reload_grayscale_filters(self):
-        print('Reload grayscale filters')
-
-    def reload_color_filters(self):
-        print('Reload color filters')
-
-    def load_grayscale_filters(self):
-        # Filter container
         self.filter_container = QWidget(self.main_label2)
         self.filter_container.setObjectName("filter_container")
         self.filter_container.resize(int(self.main_label2.width()), int(self.main_label2.height() * 0.85))
@@ -149,44 +142,59 @@ class App(QWidget):
         self.filter_container.setLayout(self.h_list_layout)
         self.scroll = QScrollArea(self.filter_container)
         self.h_list_layout.addWidget(self.scroll)
+
+        self.load_grayscale_filters()
+
+    def remove_filters(self):
+        for f_text in reversed(self.filter_widgets['filter_texts']):
+            f_text.hide()
+            self.filter_widgets['filter_texts'].pop()
+        for f_button in reversed(self.filter_widgets['filter_buttons']):
+            f_button.hide()
+            self.filter_widgets['filter_buttons'].pop()
+        for f_layout in reversed(self.filter_widgets['filter_layouts']):
+            self.scroll_layout.removeItem(f_layout)
+            self.filter_widgets['filter_layouts'].pop()
+
+    def reload_grayscale_filters(self):
+        self.remove_filters()
+        self.load_grayscale_filters()
+        print('Reload grayscale filters')
+
+    def reload_color_filters(self):
+        print('Reload color filters')
+        self.remove_filters()
+        self.load_color_filters()
+
+    def load_grayscale_filters(self):
         self.scroll_content = QWidget(self.scroll)
         self.scroll_layout = QHBoxLayout(self.scroll_content)
         self.scroll_content.setLayout(self.scroll_layout)
-
         # Grayscale filter
         self.add_filter("Grayscale", styles.gs_button_style, self.set_grayscale_image)
         # Negative grayscale filter
         self.add_filter("Negative", styles.negative_button_style, self.set_negative_image)
         # Black and white filter
         self.add_filter("B & W", styles.b_w_button_style, self.set_b_w_image)
-        for i in range(50):
-            self.add_filter("Negative", styles.negative_button_style, self.set_negative_image)
+        # for i in range(50):
+        #     self.add_filter("Negative", styles.negative_button_style, self.set_negative_image)
 
         self.scroll.setWidget(self.scroll_content)  # !!!important
 
     def load_color_filters(self):
-        # Filter container
-        self.filter_container.setObjectName("filter_container")
-        self.filter_container.resize(int(self.main_label2.width()), int(self.main_label2.height() * 0.85))
-        self.filter_container.move(0, 30)
-        h_list_layout = QHBoxLayout(self.filter_container)
-        self.filter_container.setLayout(h_list_layout)
-        scroll = QScrollArea(self.filter_container)
-        h_list_layout.addWidget(scroll)
-        scroll_content = QWidget(scroll)
-        self.scroll_layout = QHBoxLayout(scroll_content)
-        scroll_content.setLayout(self.scroll_layout)
-
+        self.scroll_content = QWidget(self.scroll)
+        self.scroll_layout = QHBoxLayout(self.scroll_content)
+        self.scroll_content.setLayout(self.scroll_layout)
         # Grayscale filter
-        self.add_filter("Grayscale", styles.gs_button_style, self.set_grayscale_image)
+        self.add_filter("B & W", styles.b_w_button_style, self.set_b_w_image)
         # Negative grayscale filter
-        self.add_filter("Negative", styles.negative_button_style, self.set_negative_image)
+        self.add_filter("B & W", styles.b_w_button_style, self.set_b_w_image)
         # Black and white filter
         self.add_filter("B & W", styles.b_w_button_style, self.set_b_w_image)
-        for i in range(50):
-            self.add_filter("B & W", styles.b_w_button_style, self.set_b_w_image)
+        # for i in range(50):
+        #     self.add_filter("Negative", styles.negative_button_style, self.set_negative_image)
 
-        scroll.setWidget(scroll_content)  # !!!important
+        self.scroll.setWidget(self.scroll_content)  # !!!important
 
     def select_image(self):
         # Image select window
@@ -220,15 +228,18 @@ class App(QWidget):
 
     def add_filter(self, filter_nane, style, function):
         one_filter = QVBoxLayout()
-        one_filter_name = QLabel()
-        one_filter_name.setText(filter_nane)
-        one_filter_name.setAlignment(Qt.AlignCenter)
-        one_filter.addWidget(one_filter_name)
+        filter_text = QLabel()
+        filter_text.setText(filter_nane)
+        filter_text.setAlignment(Qt.AlignCenter)
+        one_filter.addWidget(filter_text)
 
-        gs_button = QPushButton()
-        gs_button.clicked.connect(function)
-        gs_button.setStyleSheet(style)
-        one_filter.addWidget(gs_button)
+        filter_button = QPushButton()
+        filter_button.clicked.connect(function)
+        filter_button.setStyleSheet(style)
+        one_filter.addWidget(filter_button)
+        self.filter_widgets['filter_layouts'].append(one_filter)
+        self.filter_widgets['filter_texts'].append(filter_text)
+        self.filter_widgets['filter_buttons'].append(filter_button)
         self.scroll_layout.addLayout(one_filter)
 
     def resize_img(self):
