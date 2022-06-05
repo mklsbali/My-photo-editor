@@ -1,12 +1,12 @@
 import os.path
 import sys
 
-import PyQt5
-from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QFileDialog, QPushButton, QScrollBar, QListWidget, \
-    QListWidgetItem, QHBoxLayout, QScrollArea, QVBoxLayout, QLineEdit
-from PyQt5.QtGui import QIcon, QPixmap
+from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QFileDialog, QPushButton, QHBoxLayout, QScrollArea, QVBoxLayout, QLineEdit
+from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
-import styles
+
+from utils import cv_utils
+import styles.styles as styles
 import cv2 as cv
 import filters
 
@@ -16,7 +16,6 @@ W_WIDTH = 1366
 W_HEIGHT = 768
 TMP_IMAGE_PATH = './tmp/'
 TMP_IMAGE_NAME = 'tmp.png'
-
 
 
 class App(QWidget):
@@ -34,7 +33,7 @@ class App(QWidget):
         self.top = W_TOP
         self.width = W_WIDTH
         self.height = W_HEIGHT
-        self.image_path = ''
+        self.selected_image_path = 'tmp/test_photo.png'
         self.main_label1 = QLabel(self)  # image_container, upload and save buttons
         self.main_label2 = QLabel(self)  # filters
         self.main_label3 = QLabel(self)  # options, resize
@@ -49,9 +48,13 @@ class App(QWidget):
         self.scroll = QScrollArea()
         self.scroll_content = QWidget()
         self.scroll_layout = QHBoxLayout()
-        self.tmp_img = None
+        self.selected_image = cv.imread(self.selected_image_path)
+        self.tmp_image = cv.imread(self.selected_image_path)
         self.resize_input = QLineEdit()
         self.init_ui()
+
+        # tmp images
+        self.tmp_gs_image = None
 
     def init_ui(self):
         # Init main window
@@ -89,6 +92,7 @@ class App(QWidget):
         save_button = QPushButton("Save image", self.main_label1)
         save_button.clicked.connect(self.save_image)
         save_button.move(self.image_container.width() - save_button.width(), self.image_container.height() + 5)
+        self.load_image_from_path()
 
     def init_main_label3(self):
         """Options"""
@@ -138,12 +142,14 @@ class App(QWidget):
         self.filter_container.setObjectName("filter_container")
         self.filter_container.resize(int(self.main_label2.width()), int(self.main_label2.height() * 0.85))
         self.filter_container.move(0, 30)
+
         self.h_list_layout = QHBoxLayout(self.filter_container)
         self.filter_container.setLayout(self.h_list_layout)
+
         self.scroll = QScrollArea(self.filter_container)
         self.h_list_layout.addWidget(self.scroll)
 
-        self.load_grayscale_filters()
+        # self.load_grayscale_filters()
 
     def remove_filters(self):
         for f_text in reversed(self.filter_widgets['filter_texts']):
@@ -157,12 +163,17 @@ class App(QWidget):
             self.filter_widgets['filter_layouts'].pop()
 
     def reload_grayscale_filters(self):
+        gs_image = filters.gray_scale_image(self.selected_image)
+        self.tmp_image = gs_image
+        self.load_cv_image(gs_image)
         self.remove_filters()
         self.load_grayscale_filters()
         print('Reload grayscale filters')
 
     def reload_color_filters(self):
         print('Reload color filters')
+        self.load_cv_image(self.selected_image)
+        self.tmp_image = self.selected_image
         self.remove_filters()
         self.load_color_filters()
 
@@ -192,7 +203,7 @@ class App(QWidget):
         # Black and white filter
         self.add_filter("B & W", styles.b_w_button_style, self.set_b_w_image)
         # for i in range(50):
-        #     self.add_filter("Negative", styles.negative_button_style, self.set_negative_image)
+        #     self.add_filter("B & W", styles.b_w_button_style, self.set_b_w_image)
 
         self.scroll.setWidget(self.scroll_content)  # !!!important
 
@@ -201,30 +212,40 @@ class App(QWidget):
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
         image_select_window = QFileDialog.getOpenFileName(self, 'OpenFile', '', "Image file (*.jpg *.png *.jpeg *.gif)", options=options)
-        self.image_path = image_select_window[0]
-        self.set_image_label()
+        self.selected_image_path = image_select_window[0]
+        self.selected_image = cv.imread(self.selected_image_path)
+        self.load_image_from_path()
 
     def save_image(self):
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
         f_name, _ = QFileDialog.getSaveFileName(self, "QFileDialog.getSaveFileName()","","All Files (*);;Text Files (*.txt)", options=options)
         if f_name:
-            cv.imwrite(f_name, self.tmp_img)
+            cv.imwrite(f_name, self.tmp_image)
 
-    def set_image_label(self):
-        pixmap = QPixmap(self.image_path)
+    def load_image_from_path(self):
+        pixmap = QPixmap(self.selected_image_path)
         if pixmap.width() > self.image_container.width() or pixmap.height() > self.image_container.height():
             pixmap = pixmap.scaled(self.image_container.width()-130, self.image_container.height()-70, Qt.KeepAspectRatio)
         self.image_label.setPixmap(pixmap)
         self.image_label.resize(pixmap.width(), pixmap.height())
         self.image_label.move(int((self.image_container.width()-self.image_label.width())/2), 10)
 
-    def load_filtered_image(self, filtered):
+    def load_cv_image(self, cv_image):
+        pixmap = cv_utils.convert_cv_qt_pixmap(cv_image)
+        if pixmap.width() > self.image_container.width() or pixmap.height() > self.image_container.height():
+            pixmap = pixmap.scaled(self.image_container.width() - 130, self.image_container.height() - 70,
+                                   Qt.KeepAspectRatio)
+        self.image_label.setPixmap(pixmap)
+        self.image_label.resize(pixmap.width(), pixmap.height())
+        self.image_label.move(int((self.image_container.width() - self.image_label.width()) / 2), 10)
+
+    def save_filtered_image(self, filtered):
+        """Saves a filtered image and set image_path to the saved image path"""
         if not os.path.exists(TMP_IMAGE_PATH):
             os.mkdir(TMP_IMAGE_PATH)
-        self.image_path = os.path.join(TMP_IMAGE_PATH, TMP_IMAGE_NAME)
-        cv.imwrite(self.image_path, filtered)
-        self.set_image_label()
+        self.selected_image_path = os.path.join(TMP_IMAGE_PATH, TMP_IMAGE_NAME)
+        cv.imwrite(self.selected_image_path, filtered)
 
     def add_filter(self, filter_nane, style, function):
         one_filter = QVBoxLayout()
@@ -243,29 +264,27 @@ class App(QWidget):
         self.scroll_layout.addLayout(one_filter)
 
     def resize_img(self):
-        self.tmp_img = cv.imread(self.image_path)
-        width = int(self.tmp_img.shape[1] * int(self.resize_input.text()) / 100)
-        height = int(self.tmp_img.shape[0] * int(self.resize_input.text()) / 100)
-        self.tmp_img = cv.resize(self.tmp_img, (width, height), interpolation=cv.INTER_AREA)
-        self.load_filtered_image(self.tmp_img)
+        width = int(self.tmp_image.shape[1] * int(self.resize_input.text()) / 100)
+        height = int(self.tmp_image.shape[0] * int(self.resize_input.text()) / 100)
+        resized_img = cv.resize(self.tmp_image, (width, height), interpolation=cv.INTER_AREA)
+        self.load_cv_image(resized_img)
 
     def set_grayscale_image(self):
-        self.tmp_img = cv.imread(self.image_path)
-        gs_image = filters.gray_scale_image(self.tmp_img)
-        self.load_filtered_image(gs_image)
+        gs_image = filters.gray_scale_image(self.selected_image)
+        self.load_cv_image(gs_image)
+        self.tmp_image = gs_image
 
     def set_negative_image(self):
-        self.tmp_img = cv.imread(self.image_path)
-        gs_image = filters.gray_scale_image(self.tmp_img)
+        gs_image = filters.gray_scale_image(self.selected_image)
         negative = filters.negative_image(gs_image)
-        self.load_filtered_image(negative)
+        self.load_cv_image(negative)
+        self.tmp_image = negative
 
     def set_b_w_image(self):
-        self.tmp_img = cv.imread(self.image_path)
-        gs_image = filters.gray_scale_image(self.tmp_img)
+        gs_image = filters.gray_scale_image(self.selected_image)
         b_w = filters.b_w_image(gs_image)
-        self.load_filtered_image(b_w)
-
+        self.load_cv_image(b_w)
+        self.tmp_image = b_w
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

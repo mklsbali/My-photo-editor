@@ -18,14 +18,14 @@ main_label3_style = "#main_label3 {border: 1px solid black;" \
 negative_button_style = "background-color: #888888;" \
                         "height: 75px;" \
                         "width: 75px;" \
-                        "background-image : url(test_photo/test_photo_neg.png);"
+                        "background-image : url(styles/filter_images/test_photo_neg.png);"
 
 gs_button_style = "background-color: #888888;" \
                         "height: 75px;" \
                         "width: 75px;" \
-                        "background-image : url(test_photo/test_photo_gs.png);"
+                        "background-image : url(styles/filter_images/test_photo_gs.png);"
 
 b_w_button_style = "background-color: #888888;" \
                         "height: 75px;" \
                         "width: 75px;" \
-                        "background-image : url(test_photo/test_photo_bw.png);"
+                        "background-image : url(styles/filter_images/test_photo_bw.png);"
