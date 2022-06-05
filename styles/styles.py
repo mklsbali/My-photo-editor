@@ -4,6 +4,7 @@ title_style = {
 }
 filter_image_dim = 60
 
+
 image_container_style = "#image_container {border: 1px solid black;" \
                         "border-width: 3;" \
                         "border-color: #888888}"
@@ -29,3 +30,17 @@ b_w_button_style = "background-color: #888888;" \
                         "height: 75px;" \
                         "width: 75px;" \
                         "background-image : url(styles/filter_images/test_photo_bw.png);"
+
+general_label_text_style = "font-size: 15px"
+
+resize_input_style = "font-size: 15px;" \
+                     "width: 30px"
+
+
+def cp_color(color="#99c1f1"):
+    cp_style = "#cp_button {background-color:" + color + ";" \
+               "width: 50 px;" \
+               "height: 15px}"
+    return cp_style
+
+

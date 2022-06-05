@@ -1,8 +1,9 @@
 import os.path
 import sys
 
-from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QFileDialog, QPushButton, QHBoxLayout, QScrollArea, QVBoxLayout, QLineEdit
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QFileDialog, QPushButton, QHBoxLayout, QScrollArea, \
+    QVBoxLayout, QLineEdit, QColorDialog
+from PyQt5.QtGui import QPixmap, QColor
 from PyQt5.QtCore import Qt
 
 from utils import cv_utils
@@ -27,7 +28,7 @@ class App(QWidget):
             "filter_buttons": [],
             "filter_layouts": []
         }
-
+        self.cp_button = QPushButton()
         self.title = 'My photo editor'
         self.left = W_LEFT
         self.top = W_TOP
@@ -52,9 +53,9 @@ class App(QWidget):
         self.tmp_image = cv.imread(self.selected_image_path)
         self.resize_input = QLineEdit()
         self.init_ui()
-
-        # tmp images
+        self.color = QColor()
         self.tmp_gs_image = None
+        self.cp_button = QPushButton()
 
     def init_ui(self):
         # Init main window
@@ -102,18 +103,34 @@ class App(QWidget):
         # self.main_label3.setStyleSheet(styles.main_label3_style)
 
         # Resize container
+        self.resize_input.setStyleSheet(styles.resize_input_style)
         resize_container = QWidget(self.main_label3)
-        resize_container.move(10, 10)
+        resize_container.move(int(self.main_label1.width()*0.01), int(self.main_label1.height()*0.01))
         resize_container_layout = QHBoxLayout()
         resize_container.setLayout(resize_container_layout)
         resize_label = QLabel()
         resize_label.setText("%")
+        resize_label.setStyleSheet(styles.general_label_text_style)
         resize_button = QPushButton("Resize")
         resize_button.clicked.connect(self.resize_img)
         # resize_button.move(int(self.width*0.1), int(self.height*0.1))
         resize_container_layout.addWidget(self.resize_input)
         resize_container_layout.addWidget(resize_label)
         resize_container_layout.addWidget(resize_button)
+
+        # Color picker
+        cp_container = QWidget(self.main_label3)
+        cp_container.move(int(self.main_label1.width()*0.01), int(self.main_label1.height()*0.07))
+        cp_layout = QHBoxLayout()
+        cp_container.setLayout(cp_layout)
+        cp_text = QLabel()
+        cp_text.setText("Pick a color")
+        cp_text.setStyleSheet(styles.general_label_text_style)
+        self.cp_button.setObjectName("cp_button")
+        self.cp_button.setStyleSheet(styles.cp_color())
+        self.cp_button.clicked.connect(self.pick_a_color)
+        cp_layout.addWidget(cp_text)
+        cp_layout.addWidget(self.cp_button)
 
     def init_main_label2(self):
         """Filters"""
@@ -263,12 +280,24 @@ class App(QWidget):
         self.filter_widgets['filter_buttons'].append(filter_button)
         self.scroll_layout.addLayout(one_filter)
 
+    """options functions"""
     def resize_img(self):
         width = int(self.tmp_image.shape[1] * int(self.resize_input.text()) / 100)
         height = int(self.tmp_image.shape[0] * int(self.resize_input.text()) / 100)
         resized_img = cv.resize(self.tmp_image, (width, height), interpolation=cv.INTER_AREA)
         self.load_cv_image(resized_img)
 
+    def pick_a_color(self):
+        color_class = QColorDialog.getColor()
+        if color_class.isValid():
+            self.color = color_class.name()
+            print(styles.cp_color(self.color))
+            self.cp_button.setStyleSheet(styles.cp_color(self.color))
+            self.cp_button.hide()
+
+    def reload_picked_color(self):
+        pass
+    """filters functions"""
     def set_grayscale_image(self):
         gs_image = filters.gray_scale_image(self.selected_image)
         self.load_cv_image(gs_image)
@@ -285,6 +314,7 @@ class App(QWidget):
         b_w = filters.b_w_image(gs_image)
         self.load_cv_image(b_w)
         self.tmp_image = b_w
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
