@@ -44,3 +44,10 @@ def cp_color(color="#99c1f1"):
     return cp_style
 
 
+def filter_style(f_image_path):
+    f_style = "background-color: #888888;" \
+                       "height: 75px;" \
+                       "width: 75px;" \
+                       "background-image : url({});".format(f_image_path)
+    return f_style
+

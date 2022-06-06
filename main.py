@@ -9,7 +9,7 @@ from PyQt5.QtCore import Qt
 from utils import cv_utils
 import styles.styles as styles
 import cv2 as cv
-import filters
+import cv_filters
 
 W_LEFT = 100
 W_TOP = 100
@@ -17,7 +17,7 @@ W_WIDTH = 1366
 W_HEIGHT = 768
 TMP_IMAGE_PATH = './tmp/'
 TMP_IMAGE_NAME = 'tmp.png'
-
+GENERAL_FILTER_IMAGE_PATH = './styles/filter_images/test_photo.png'
 
 class App(QWidget):
 
@@ -181,7 +181,7 @@ class App(QWidget):
             self.filter_widgets['filter_layouts'].pop()
 
     def reload_grayscale_filters(self):
-        gs_image = filters.gray_scale_image(self.selected_image)
+        gs_image = cv_filters.gray_scale_image(self.selected_image)
         self.tmp_image = gs_image
         self.load_cv_image(gs_image)
         self.remove_filters()
@@ -200,13 +200,13 @@ class App(QWidget):
         self.scroll_layout = QHBoxLayout(self.scroll_content)
         self.scroll_content.setLayout(self.scroll_layout)
         # Grayscale filter
-        self.add_filter("Grayscale", styles.gs_button_style, self.set_grayscale_image)
+        self.add_filter("Grayscale", self.set_grayscale_image)
         # Negative grayscale filter
-        self.add_filter("Negative", styles.negative_button_style, self.set_negative_image)
-        # Black and white filter
-        self.add_filter("B & W", styles.b_w_button_style, self.set_b_w_image)
-        # for i in range(50):
-        #     self.add_filter("Negative", styles.negative_button_style, self.set_negative_image)
+        self.add_filter("Negative", self.set_negative_image)
+        # # Black and white filter
+        self.add_filter("B_W",  self.set_b_w_image)
+        for i in range(50):
+            self.add_filter("Negative", self.set_negative_image)
 
         self.scroll.setWidget(self.scroll_content)  # !!!important
 
@@ -215,13 +215,10 @@ class App(QWidget):
         self.scroll_layout = QHBoxLayout(self.scroll_content)
         self.scroll_content.setLayout(self.scroll_layout)
         # Grayscale filter
-        self.add_filter("B & W", styles.b_w_button_style, self.set_b_w_image)
+        for i in range(50):
+            self.add_filter("B_W", self.set_b_w_image)
+
         # Negative grayscale filter
-        self.add_filter("B & W", styles.b_w_button_style, self.set_b_w_image)
-        # Black and white filter
-        self.add_filter("B & W", styles.b_w_button_style, self.set_b_w_image)
-        # for i in range(50):
-        #     self.add_filter("B & W", styles.b_w_button_style, self.set_b_w_image)
 
         self.scroll.setWidget(self.scroll_content)  # !!!important
 
@@ -265,16 +262,17 @@ class App(QWidget):
         self.selected_image_path = os.path.join(TMP_IMAGE_PATH, TMP_IMAGE_NAME)
         cv.imwrite(self.selected_image_path, filtered)
 
-    def add_filter(self, filter_nane, style, function):
+    def add_filter(self, filter_name, function):
         one_filter = QVBoxLayout()
         filter_text = QLabel()
-        filter_text.setText(filter_nane)
+        filter_text.setText(filter_name)
         filter_text.setAlignment(Qt.AlignCenter)
         one_filter.addWidget(filter_text)
 
         filter_button = QPushButton()
-        filter_button.clicked.connect(function)
-        filter_button.setStyleSheet(style)
+        filter_button.clicked.connect(lambda: function(was_clicked=True))
+        f_image_path = self.apply_filter_image(filter_name, function)
+        filter_button.setStyleSheet(styles.filter_style(f_image_path))
         one_filter.addWidget(filter_button)
         self.filter_widgets['filter_layouts'].append(one_filter)
         self.filter_widgets['filter_texts'].append(filter_text)
@@ -282,11 +280,17 @@ class App(QWidget):
         self.scroll_layout.addLayout(one_filter)
 
     """options functions"""
-    def resize_img(self):
-        width = int(self.tmp_image.shape[1] * int(self.resize_input.text()) / 100)
-        height = int(self.tmp_image.shape[0] * int(self.resize_input.text()) / 100)
-        resized_img = cv.resize(self.tmp_image, (width, height), interpolation=cv.INTER_AREA)
-        self.load_cv_image(resized_img)
+    def resize_img(self, img=None, was_clicked=True):
+        if was_clicked:
+            width = int(self.tmp_image.shape[1] * int(self.resize_input.text()) / 100)
+            height = int(self.tmp_image.shape[0] * int(self.resize_input.text()) / 100)
+            resized_img = cv.resize(self.tmp_image, (width, height), interpolation=cv.INTER_AREA)
+            self.load_cv_image(resized_img)
+        else:
+            width = int(img.shape[1] * 20 / 100)
+            height = int(img.shape[0] * 20 / 100)
+            resized_img = cv.resize(img, (width, height), interpolation=cv.INTER_AREA)
+        return resized_img
 
     def pick_a_color(self):
         color_class = QColorDialog.getColor()
@@ -295,25 +299,42 @@ class App(QWidget):
             print("Picked color: {}".format(self.color))
             self.cp_button.setStyleSheet(styles.cp_color(self.color))
 
-    def reload_picked_color(self):
-        pass
     """filters functions"""
-    def set_grayscale_image(self):
-        gs_image = filters.gray_scale_image(self.selected_image)
-        self.load_cv_image(gs_image)
-        self.tmp_image = gs_image
+    def set_grayscale_image(self, was_clicked=True):
+        if was_clicked:
+            gs_image = cv_filters.gray_scale_image(self.selected_image)
+            self.load_cv_image(gs_image)
+            self.tmp_image = gs_image
+            print('clicked')
+        else:
+            gs_image = cv_filters.gray_scale_image(cv.imread(GENERAL_FILTER_IMAGE_PATH))
+        return gs_image
 
-    def set_negative_image(self):
-        gs_image = filters.gray_scale_image(self.selected_image)
-        negative = filters.negative_image(gs_image)
-        self.load_cv_image(negative)
-        self.tmp_image = negative
+    def set_negative_image(self, was_clicked=True):
+        if was_clicked:
+            negative = cv_filters.negative_image(self.selected_image)
+            self.load_cv_image(negative)
+            self.tmp_image = negative
+        else:
+            negative = cv_filters.negative_image(cv.imread(GENERAL_FILTER_IMAGE_PATH))
+        return negative
 
-    def set_b_w_image(self):
-        gs_image = filters.gray_scale_image(self.selected_image)
-        b_w = filters.b_w_image(gs_image)
-        self.load_cv_image(b_w)
-        self.tmp_image = b_w
+    def set_b_w_image(self, was_clicked=True):
+        if was_clicked:
+            b_w = cv_filters.b_w_image(self.selected_image)
+            self.load_cv_image(b_w)
+            self.tmp_image = b_w
+        else:
+            b_w = cv_filters.b_w_image(cv.imread(GENERAL_FILTER_IMAGE_PATH))
+        return b_w
+
+    def apply_filter_image(self, f_name, function):
+        f_path = os.path.join('styles', 'filter_images', f_name+'.png')
+        if not os.path.exists(f_path):
+            filter_image = function(was_clicked=False)
+            resized_image = self.resize_img(img=filter_image, was_clicked=False)
+            cv.imwrite(f_path, resized_image)
+        return f_path
 
 
 if __name__ == '__main__':

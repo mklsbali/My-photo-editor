@@ -6,7 +6,7 @@ from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtCore import Qt
 import styles
 import cv2 as cv
-import filters
+import cv_filters
 
 W_LEFT = 100
 W_TOP = 100
