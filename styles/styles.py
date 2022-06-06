@@ -39,8 +39,8 @@ resize_input_style = "font-size: 15px;" \
 
 def cp_color(color="#99c1f1"):
     cp_style = "#cp_button {background-color:" + color + ";" \
-               "width: 50 px;" \
-               "height: 15px}"
+               "width: 70 px;" \
+               "height: 18px}"
     return cp_style
 
 

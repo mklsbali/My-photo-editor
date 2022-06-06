@@ -52,10 +52,11 @@ class App(QWidget):
         self.selected_image = cv.imread(self.selected_image_path)
         self.tmp_image = cv.imread(self.selected_image_path)
         self.resize_input = QLineEdit()
-        self.init_ui()
+
         self.color = QColor()
-        self.tmp_gs_image = None
         self.cp_button = QPushButton()
+
+        self.init_ui()
 
     def init_ui(self):
         # Init main window
@@ -291,9 +292,8 @@ class App(QWidget):
         color_class = QColorDialog.getColor()
         if color_class.isValid():
             self.color = color_class.name()
-            print(styles.cp_color(self.color))
+            print("Picked color: {}".format(self.color))
             self.cp_button.setStyleSheet(styles.cp_color(self.color))
-            self.cp_button.hide()
 
     def reload_picked_color(self):
         pass
