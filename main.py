@@ -348,11 +348,15 @@ class App(QWidget):
         rgb = cv_utils.hex_to_rgb_color(self.color[1:])
         if was_clicked:
             test_im = cv_filters_c.test_filter(self.selected_image, rgb[0], rgb[1], rgb[2])
-            self.load_cv_image(test_im)
-            self.tmp_image = test_im
+            # print(test_im)
+            npy_im = cv_utils.uint8_to_npy1(test_im)
+            self.load_cv_image(npy_im)
+            # print(test_im)
+            self.tmp_image = npy_im
         else:
-            test_im = cv_filters_c.test_filter(cv.imread(GENERAL_FILTER_IMAGE_PATH), self.color)
-        return test_im
+            test_im = cv_filters_c.test_filter(cv.imread(GENERAL_FILTER_IMAGE_PATH), rgb[0], rgb[1], rgb[2])
+            npy_im = cv_utils.uint8_to_npy1(test_im)
+        return npy_im
 
 
 if __name__ == '__main__':
