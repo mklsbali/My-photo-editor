@@ -1,4 +1,7 @@
 import cv2 as cv
+import numpy as np
+import cython
+from utils.cv_utils import hex_to_rgb_color
 
 
 def gray_scale_image(image):
@@ -14,3 +17,17 @@ def b_w_image(image):
     gs_image = gray_scale_image(image)
     thresh, b_w_im = cv.threshold(gs_image, 127, 255, cv.THRESH_BINARY)
     return b_w_im
+
+
+def test_filter(image, hex_color):
+    rgb_color = hex_to_rgb_color(hex_color[1:])
+    print(type(image))
+    width = image.shape[1]
+    height = image.shape[0]
+    for j in np.arange(0, height):
+        for i in np.arange(0, width):
+            image[j][i][0] = image[j][i][0] + rgb_color[0] // 2
+            image[j][i][1] = image[j][i][1] + rgb_color[1] // 2
+            image[j][i][2] = image[j][i][2] + rgb_color[2] // 2
+
+    return image

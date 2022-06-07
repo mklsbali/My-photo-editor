@@ -53,7 +53,7 @@ class App(QWidget):
         self.tmp_image = cv.imread(self.selected_image_path)
         self.resize_input = QLineEdit()
 
-        self.color = QColor()
+        self.color = "#FFAABB"
         self.cp_button = QPushButton()
 
         self.init_ui()
@@ -181,12 +181,13 @@ class App(QWidget):
             self.filter_widgets['filter_layouts'].pop()
 
     def reload_grayscale_filters(self):
+        print('Reload grayscale filters')
         gs_image = cv_filters.gray_scale_image(self.selected_image)
         self.tmp_image = gs_image
         self.load_cv_image(gs_image)
         self.remove_filters()
         self.load_grayscale_filters()
-        print('Reload grayscale filters')
+
 
     def reload_color_filters(self):
         print('Reload color filters')
@@ -215,8 +216,7 @@ class App(QWidget):
         self.scroll_layout = QHBoxLayout(self.scroll_content)
         self.scroll_content.setLayout(self.scroll_layout)
         # Grayscale filter
-        for i in range(50):
-            self.add_filter("B_W", self.set_b_w_image)
+        self.add_filter("test_cf", self.test_cf)
 
         # Negative grayscale filter
 
@@ -335,6 +335,15 @@ class App(QWidget):
             resized_image = self.resize_img(img=filter_image, was_clicked=False)
             cv.imwrite(f_path, resized_image)
         return f_path
+
+    def test_cf(self, was_clicked=True):
+        if was_clicked:
+            test_im = cv_filters.test_filter(self.selected_image, self.color)
+            self.load_cv_image(test_im)
+            self.tmp_image = test_im
+        else:
+            test_im = cv_filters.test_filter(cv.imread(GENERAL_FILTER_IMAGE_PATH), self.color)
+        return test_im
 
 
 if __name__ == '__main__':
