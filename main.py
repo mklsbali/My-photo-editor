@@ -10,6 +10,7 @@ from utils import cv_utils
 import styles.styles as styles
 import cv2 as cv
 import cv_filters
+import cv_filters_c
 
 W_LEFT = 100
 W_TOP = 100
@@ -337,12 +338,20 @@ class App(QWidget):
         return f_path
 
     def test_cf(self, was_clicked=True):
+        # if was_clicked:
+        #     test_im = cv_filters.test_filter(self.selected_image, self.color)
+        #     self.load_cv_image(test_im)
+        #     self.tmp_image = test_im
+        # else:
+        #     test_im = cv_filters.test_filter(cv.imread(GENERAL_FILTER_IMAGE_PATH), self.color)
+        # return test_im
+        rgb = cv_utils.hex_to_rgb_color(self.color[1:])
         if was_clicked:
-            test_im = cv_filters.test_filter(self.selected_image, self.color)
+            test_im = cv_filters_c.test_filter(self.selected_image, rgb[0], rgb[1], rgb[2])
             self.load_cv_image(test_im)
             self.tmp_image = test_im
         else:
-            test_im = cv_filters.test_filter(cv.imread(GENERAL_FILTER_IMAGE_PATH), self.color)
+            test_im = cv_filters_c.test_filter(cv.imread(GENERAL_FILTER_IMAGE_PATH), self.color)
         return test_im
 
 
