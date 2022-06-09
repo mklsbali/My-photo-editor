@@ -3,14 +3,16 @@ import sys
 
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QFileDialog, QPushButton, QHBoxLayout, QScrollArea, \
     QVBoxLayout, QLineEdit, QColorDialog
-from PyQt5.QtGui import QPixmap, QColor
+from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
 
 from utils import cv_utils
 import styles.styles as styles
 import cv2 as cv
-import cv_filters
-import cv_filters_c
+import filters.cv_filters
+import filters.rgb2_x
+import filters.bgr2_x
+# import cv_filters_c
 
 W_LEFT = 100
 W_TOP = 100
@@ -151,12 +153,16 @@ class App(QWidget):
         # Grayscale filters button
         grayscale_filters_b = QPushButton("Grayscale")
         grayscale_filters_b.clicked.connect(self.reload_grayscale_filters)
-        # Colorful filters button
-        colorful_filters_b = QPushButton("Colorful")
-        colorful_filters_b.clicked.connect(self.reload_color_filters)
+        # RGB2_X filters button
+        rgb2x_filters_b = QPushButton("RGB2_X")
+        rgb2x_filters_b.clicked.connect(self.reload_rgb2x_filters)
+        # BGR2_X filters button
+        bgr2x_filters_b = QPushButton("BGR2_X")
+        bgr2x_filters_b.clicked.connect(self.reload_bgr2x_filters)
         filter_type_layout.addWidget(filter_type_text)
         filter_type_layout.addWidget(grayscale_filters_b)
-        filter_type_layout.addWidget(colorful_filters_b)
+        filter_type_layout.addWidget(rgb2x_filters_b)
+        filter_type_layout.addWidget(bgr2x_filters_b)
         self.filter_container = QWidget(self.main_label2)
         self.filter_container.setObjectName("filter_container")
         self.filter_container.resize(int(self.main_label2.width()), int(self.main_label2.height() * 0.85))
@@ -181,26 +187,29 @@ class App(QWidget):
             self.scroll_layout.removeItem(f_layout)
             self.filter_widgets['filter_layouts'].pop()
 
-    def reload_grayscale_filters(self):
-        print('Reload grayscale filters')
-        gs_image = cv_filters.gray_scale_image(self.selected_image)
-        self.tmp_image = gs_image
-        self.load_cv_image(gs_image)
-        self.remove_filters()
-        self.load_grayscale_filters()
-
-
-    def reload_color_filters(self):
-        print('Reload color filters')
+    def reload_filters(self, function, message):
+        print(message)
         self.load_cv_image(self.selected_image)
         self.tmp_image = self.selected_image
         self.remove_filters()
-        self.load_color_filters()
+        function()
 
-    def load_grayscale_filters(self):
+    def reload_grayscale_filters(self):
+        self.reload_filters(self.load_grayscale_filters, "Reload grayscale filters")
+
+    def reload_rgb2x_filters(self):
+        self.reload_filters(self.load_rgb2_x_filters, "Reload rgb2x filters")
+
+    def reload_bgr2x_filters(self):
+        self.reload_filters(self.load_bgr2_x_filters, "Reload bgr2x filters")
+
+    def setup_scroll_content(self):
         self.scroll_content = QWidget(self.scroll)
         self.scroll_layout = QHBoxLayout(self.scroll_content)
         self.scroll_content.setLayout(self.scroll_layout)
+
+    def load_grayscale_filters(self):
+        self.setup_scroll_content()
         # Grayscale filter
         self.add_filter("Grayscale", self.set_grayscale_image)
         # Negative grayscale filter
@@ -212,13 +221,33 @@ class App(QWidget):
 
         self.scroll.setWidget(self.scroll_content)  # !!!important
 
+    def load_rgb2_x_filters(self):
+        self.setup_scroll_content()
+
+        self.add_filter("rgb2hsv", self.rgb2hsv)
+        self.add_filter("rgb2bgr", self.rgb2bgr)
+        self.add_filter("rgb2lab", self.rgb2lab)
+
+        self.scroll.setWidget(self.scroll_content)
+
+    def load_bgr2_x_filters(self):
+        self.setup_scroll_content()
+
+        self.add_filter("bgr2hsv", self.bgr2hsv)
+        self.add_filter("bgr2rgb", self.bgr2rgb)
+        self.add_filter("bgr2lab", self.bgr2lab)
+
+        self.scroll.setWidget(self.scroll_content)
+
     def load_color_filters(self):
         self.scroll_content = QWidget(self.scroll)
         self.scroll_layout = QHBoxLayout(self.scroll_content)
         self.scroll_content.setLayout(self.scroll_layout)
         # Grayscale filter
-        self.add_filter("test_cf", self.test_cf)
-
+        # self.add_filter("test_cf", self.test_cf)
+        self.add_filter("hsv", self.set_hsv_image)
+        self.add_filter("rgb", self.set_rgb_image)
+        self.add_filter("lab", self.set_lab_image)
         # Negative grayscale filter
 
         self.scroll.setWidget(self.scroll_content)  # !!!important
@@ -300,34 +329,66 @@ class App(QWidget):
             print("Picked color: {}".format(self.color))
             self.cp_button.setStyleSheet(styles.cp_color(self.color))
 
-    """filters functions"""
-    def set_grayscale_image(self, was_clicked=True):
+    """filters functions
+    """
+    def set_image(self, filter_function_name, module,  was_clicked=True):
+        """Generic function to call and apply a filter from another module"""
+        filter_function = getattr(module, filter_function_name)
         if was_clicked:
-            gs_image = cv_filters.gray_scale_image(self.selected_image)
-            self.load_cv_image(gs_image)
-            self.tmp_image = gs_image
-            print('clicked')
+            filtered = filter_function(self.selected_image)
+            self.load_cv_image(filtered)
+            self.tmp_image = filtered
         else:
-            gs_image = cv_filters.gray_scale_image(cv.imread(GENERAL_FILTER_IMAGE_PATH))
-        return gs_image
+            filtered = filter_function(cv.imread(GENERAL_FILTER_IMAGE_PATH))
+        return filtered
+    """grayscale"""
+    def set_grayscale_image(self, was_clicked=True):
+        return self.set_image("gray_scale_image", filters.cv_filters, was_clicked)
 
     def set_negative_image(self, was_clicked=True):
-        if was_clicked:
-            negative = cv_filters.negative_image(self.selected_image)
-            self.load_cv_image(negative)
-            self.tmp_image = negative
-        else:
-            negative = cv_filters.negative_image(cv.imread(GENERAL_FILTER_IMAGE_PATH))
-        return negative
+        return self.set_image("negative_image", filters.cv_filters, was_clicked)
 
     def set_b_w_image(self, was_clicked=True):
-        if was_clicked:
-            b_w = cv_filters.b_w_image(self.selected_image)
-            self.load_cv_image(b_w)
-            self.tmp_image = b_w
-        else:
-            b_w = cv_filters.b_w_image(cv.imread(GENERAL_FILTER_IMAGE_PATH))
-        return b_w
+        return self.set_image("b_w_image", filters.cv_filters, was_clicked)
+    """rgb2_x"""
+    def rgb2hsv(self, was_clicked=True):
+        return self.set_image("rgb2hsv", filters.rgb2_x, was_clicked)
+
+    def rgb2bgr(self, was_clicked=True):
+        return self.set_image("rgb2bgr", filters.rgb2_x, was_clicked)
+
+    def rgb2lab(self, was_clicked=True):
+        return self.set_image("rgb2lab", filters.rgb2_x, was_clicked)
+    """bgr2_x"""
+    def bgr2hsv(self, was_clicked=True):
+        return self.set_image("bgr2hsv", filters.bgr2_x, was_clicked)
+
+    def bgr2rgb(self, was_clicked=True):
+        return self.set_image("bgr2rgb", filters.bgr2_x, was_clicked)
+
+    def bgr2lab(self, was_clicked=True):
+        return self.set_image("bgr2lab", filters.bgr2_x, was_clicked)
+
+    # def test_cf(self, was_clicked=True):
+    #     # if was_clicked:
+    #     #     test_im = cv_filters.test_filter(self.selected_image, self.color)
+    #     #     self.load_cv_image(test_im)
+    #     #     self.tmp_image = test_im
+    #     # else:
+    #     #     test_im = cv_filters.test_filter(cv.imread(GENERAL_FILTER_IMAGE_PATH), self.color)
+    #     # return test_im
+    #     rgb = cv_utils.hex_to_rgb_color(self.color[1:])
+    #     if was_clicked:
+    #         filtered = cv_filters_c.test_filter(self.selected_image, rgb[0], rgb[1], rgb[2])
+    #         # print(test_im)
+    #         npy_im = cv_utils.uint8_to_npy1(filtered)
+    #         self.load_cv_image(npy_im)
+    #         # print(test_im)
+    #         self.tmp_image = npy_im
+    #     else:
+    #         filtered = cv_filters_c.test_filter(cv.imread(GENERAL_FILTER_IMAGE_PATH), rgb[0], rgb[1], rgb[2])
+    #         npy_im = cv_utils.uint8_to_npy1(filtered)
+    #     return npy_im
 
     def apply_filter_image(self, f_name, function):
         f_path = os.path.join('styles', 'filter_images', f_name+'.png')
@@ -336,27 +397,6 @@ class App(QWidget):
             resized_image = self.resize_img(img=filter_image, was_clicked=False)
             cv.imwrite(f_path, resized_image)
         return f_path
-
-    def test_cf(self, was_clicked=True):
-        # if was_clicked:
-        #     test_im = cv_filters.test_filter(self.selected_image, self.color)
-        #     self.load_cv_image(test_im)
-        #     self.tmp_image = test_im
-        # else:
-        #     test_im = cv_filters.test_filter(cv.imread(GENERAL_FILTER_IMAGE_PATH), self.color)
-        # return test_im
-        rgb = cv_utils.hex_to_rgb_color(self.color[1:])
-        if was_clicked:
-            test_im = cv_filters_c.test_filter(self.selected_image, rgb[0], rgb[1], rgb[2])
-            # print(test_im)
-            npy_im = cv_utils.uint8_to_npy1(test_im)
-            self.load_cv_image(npy_im)
-            # print(test_im)
-            self.tmp_image = npy_im
-        else:
-            test_im = cv_filters_c.test_filter(cv.imread(GENERAL_FILTER_IMAGE_PATH), rgb[0], rgb[1], rgb[2])
-            npy_im = cv_utils.uint8_to_npy1(test_im)
-        return npy_im
 
 
 if __name__ == '__main__':

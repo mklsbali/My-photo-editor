@@ -1,11 +1,10 @@
 import cv2 as cv
 import numpy as np
-import cython
 from utils.cv_utils import hex_to_rgb_color
 
 
 def gray_scale_image(image):
-    return cv.cvtColor(image, cv.COLOR_BGR2GRAY)
+    return cv.cvtColor(image, cv.COLOR_RGB2GRAY)
 
 
 def negative_image(image):
@@ -17,6 +16,10 @@ def b_w_image(image):
     gs_image = gray_scale_image(image)
     thresh, b_w_im = cv.threshold(gs_image, 127, 255, cv.THRESH_BINARY)
     return b_w_im
+
+
+def a(image):
+    return cv.cvtColor(image, cv.COLOR_RGB2YCrCb)
 
 
 def test_filter(image, hex_color):
