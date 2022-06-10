@@ -227,6 +227,7 @@ class App(QWidget):
         self.add_filter("rgb2hsv", self.rgb2hsv)
         self.add_filter("rgb2bgr", self.rgb2bgr)
         self.add_filter("rgb2lab", self.rgb2lab)
+        self.add_filter("rgb2hls", self.rgb2hls)
 
         self.scroll.setWidget(self.scroll_content)
 
@@ -359,6 +360,9 @@ class App(QWidget):
 
     def rgb2lab(self, was_clicked=True):
         return self.set_image("rgb2lab", filters.rgb2_x, was_clicked)
+
+    def rgb2hls(self, was_clicked=True):
+        return self.set_image("rgb2hls", filters.rgb2_x, was_clicked)
     """bgr2_x"""
     def bgr2hsv(self, was_clicked=True):
         return self.set_image("bgr2hsv", filters.bgr2_x, was_clicked)

@@ -11,3 +11,7 @@ def rgb2bgr(image):
 
 def rgb2lab(image):
     return cv.cvtColor(image, cv.COLOR_RGB2LAB)
+
+
+def rgb2hls(image):
+    return cv.cvtColor(image, cv.COLOR_RGB2HLS)
