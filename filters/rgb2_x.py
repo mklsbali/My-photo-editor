@@ -1,7 +1,5 @@
 import cv2 as cv
 
-rgb2x_functions = []
-
 
 def rgb2bgr(image):
     return cv.cvtColor(image, cv.COLOR_RGB2BGR)

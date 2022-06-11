@@ -56,34 +56,12 @@ class App(QWidget):
         self.selected_image = cv.imread(self.selected_image_path)
         self.tmp_image = cv.imread(self.selected_image_path)
         self.resize_input = QLineEdit()
-
+        self.rgb_image = cv.imread(self.selected_image_path)
+        self.bgr_image = cv.imread(self.selected_image_path)
         self.color = "#FFAABB"
         self.cp_button = QPushButton()
 
         self.init_ui()
-        self.rgb2x_functions = {
-            'rgb2bgr': self.rgb2bgr,
-            'rgb2bgr555': self.rgb2bgr555,
-            'rgb2bgr565': self.rgb2bgr565,
-            'rgb2bgra': self.rgb2bgra,
-            'rgb2gray': self.rgb2gray,
-            'rgb2hls': self.rgb2hls,
-            'rgb2hls_full': self.rgb2hls_full,
-            'rgb2hsv': self.rgb2hsv,
-            'rgb2hsv_full': self.rgb2hsv_full,
-            'rgb2lab': self.rgb2lab,
-            'rgb2luv': self.rgb2luv,
-            'rgb2lab1': self.rgb2lab1,
-            'rgb2luv1': self.rgb2luv1,
-            'rgb2rgba': self.rgb2rgba,
-            'rgb2xyz': self.rgb2xyz,
-            'rgb2ycr_cb': self.rgb2ycr_cb,
-            'rgb2ycr_cb1': self.rgb2ycr_cb1,
-            'rgb2ycr_yuv': self.rgb2ycr_yuv,
-            'rgb2yuv_i420': self.rgb2yuv_i420,
-            'rgb2yuv_iyuv': self.rgb2yuv_iyuv,
-            'rgb2yv12': self.rgb2yv12,
-        }
 
     def init_ui(self):
         # Init main window
@@ -248,9 +226,9 @@ class App(QWidget):
     def load_rgb2_x_filters(self):
         self.setup_scroll_content()
 
-        # for f in self.rgb2x_functions:
-        #     print(f)
-        #     self.add_filter(f[4:], self.rgb2x_functions[f])
+        self.rgb_image = self.selected_image
+        self.load_cv_image(self.rgb_image)
+
         self.add_filter('rgb2bgr', self.rgb2bgr)
         # self.add_filter('rgb2bgr555', self.rgb2bgr555)
         # self.add_filter('rgb2bgr565', self.rgb2bgr565)
@@ -262,26 +240,44 @@ class App(QWidget):
         self.add_filter('rgb2hsv_full', self.rgb2hsv_full)
         self.add_filter('rgb2lab', self.rgb2lab)
         self.add_filter('rgb2luv', self.rgb2luv)
-        # self.add_filter('rgb2lab1', self.rgb2lab1)
-        # self.add_filter('rgb2luv1', self.rgb2luv1)
-        self.add_filter('rgb2rgba', self.rgb2rgba)
+        # self.add_filter('lab1', self.rgb2lab1)
+        # self.add_filter('luv1', self.rgb2luv1)
+        # self.add_filter('rgb2rgba', self.rgb2rgba)
         self.add_filter('rgb2xyz', self.rgb2xyz)
         self.add_filter('rgb2ycr_cb', self.rgb2ycr_cb)
-        # self.add_filter('rgb2ycr_cb1', self.rgb2ycr_cb1)
+        # self.add_filter('ycr_cb1', self.rgb2ycr_cb1)
         self.add_filter('rgb2ycr_yuv', self.rgb2ycr_yuv)
-        self.add_filter('rgb2yuv_i420', self.rgb2yuv_i420)
-        # self.add_filter('rgb2yuv_iyuv', self.rgb2yuv_iyuv)
+        # self.add_filter('rgb2yuv_i420', self.rgb2yuv_i420)
+        self.add_filter('rgb2yuv_iyuv', self.rgb2yuv_iyuv)
         # self.add_filter('rgb2yv12', self.rgb2yv12)
-
 
         self.scroll.setWidget(self.scroll_content)
 
     def load_bgr2_x_filters(self):
         self.setup_scroll_content()
-
-        self.add_filter("bgr2hsv", self.bgr2hsv)
-        self.add_filter("bgr2rgb", self.bgr2rgb)
-        self.add_filter("bgr2lab", self.bgr2lab)
+        self.bgr_image = filters.rgb2_x.rgb2bgr(self.selected_image)
+        self.load_cv_image(self.bgr_image)
+        self.add_filter('bgr2rgb', self.bgr2rgb)
+        # self.add_filter('bgr2bgr555', self.bgr2bgr555)
+        # self.add_filter('bgr2bgr565', self.bgr2bgr565)
+        # self.add_filter('bgr22bgra', self.bgr2bgra)
+        self.add_filter('bgr2gray', self.bgr2gray)
+        self.add_filter('bgr2hls', self.bgr2hls)
+        self.add_filter('bgr2hls_full', self.bgr2hls_full)
+        self.add_filter('bgr2hsv', self.bgr2hsv)
+        self.add_filter('bgr2hsv_full', self.bgr2hsv_full)
+        self.add_filter('bgr2lab', self.bgr2lab)
+        self.add_filter('bgr2luv', self.bgr2luv)
+        # self.add_filter('bgr2lab1', self.bgr2lab1)
+        # self.add_filter('bgr2luv1', self.bgr2luv1)
+        # self.add_filter('bgr2bgra', self.bgr2bgra)
+        self.add_filter('bgr2xyz', self.bgr2xyz)
+        self.add_filter('bgr2ycr_cb', self.bgr2ycr_cb)
+        # self.add_filter('bgr2ycr_cb1', self.bgr2ycr_cb1)
+        self.add_filter('bgr2ycr_yuv', self.bgr2ycr_yuv)
+        # self.add_filter('bgr2yuv_i420', self.bgr2yuv_i420)
+        self.add_filter('bgr2yuv_iyuv', self.bgr2yuv_iyuv)
+        # self.add_filter('bgr2yv12', self.bgr2yv12)
 
         self.scroll.setWidget(self.scroll_content)
 
@@ -305,6 +301,8 @@ class App(QWidget):
         image_select_window = QFileDialog.getOpenFileName(self, 'OpenFile', '', "Image file (*.jpg *.png *.jpeg *.gif)", options=options)
         self.selected_image_path = image_select_window[0]
         self.selected_image = cv.imread(self.selected_image_path)
+        self.rgb_image = self.selected_image
+        self.bgr_image = filters.rgb2_x.rgb2bgr(self.rgb_image)
         self.load_image_from_path()
 
     def save_image(self):
@@ -377,98 +375,149 @@ class App(QWidget):
 
     """filters functions
     """
-    def set_image(self, filter_function_name, module,  was_clicked=True):
+    def set_image(self, src_image, filter_function_name, module,  was_clicked=True):
         """Generic function to call and apply a filter from another module"""
         filter_function = getattr(module, filter_function_name)
         if was_clicked:
-            filtered = filter_function(self.selected_image)
+            filtered = filter_function(src_image)
             self.load_cv_image(filtered)
             self.tmp_image = filtered
         else:
-            filtered = filter_function(cv.imread(GENERAL_FILTER_IMAGE_PATH))
+            filtered = filter_function(src_image)
         return filtered
     """grayscale"""
     def set_grayscale_image(self, was_clicked=True):
-        return self.set_image("gray_scale_image", filters.cv_filters, was_clicked)
+        return self.set_image(self.rgb_image, "gray_scale_image", filters.cv_filters, was_clicked)
 
     def set_negative_image(self, was_clicked=True):
-        return self.set_image("negative_image", filters.cv_filters, was_clicked)
+        return self.set_image(self.rgb_image, "negative_image", filters.cv_filters, was_clicked)
 
     def set_b_w_image(self, was_clicked=True):
-        return self.set_image("b_w_image", filters.cv_filters, was_clicked)
+        return self.set_image(self.rgb_image, "b_w_image", filters.cv_filters, was_clicked)
     """rgb2_x filters"""
     def rgb2bgr(self, was_clicked=True):
-        return self.set_image("rgb2bgr", filters.rgb2_x, was_clicked)
+        return self.set_image(self.rgb_image, "rgb2bgr", filters.rgb2_x, was_clicked)
 
     def rgb2bgr555(self, was_clicked=True):
-        return self.set_image("rgb2bgr555", filters.rgb2_x, was_clicked)
+        return self.set_image(self.rgb_image, "rgb2bgr555", filters.rgb2_x, was_clicked)
 
     def rgb2bgr565(self, was_clicked=True):
-        return self.set_image("rgb2bgr565", filters.rgb2_x, was_clicked)
+        return self.set_image(self.rgb_image, "rgb2bgr565", filters.rgb2_x, was_clicked)
 
     def rgb2bgra(self, was_clicked=True):
-        return self.set_image("rgb2bgra", filters.rgb2_x, was_clicked)
+        return self.set_image(self.rgb_image, "rgb2bgra", filters.rgb2_x, was_clicked)
 
     def rgb2gray(self, was_clicked=True):
-        return self.set_image("rgb2gray", filters.rgb2_x, was_clicked)
+        return self.set_image(self.rgb_image, "rgb2gray", filters.rgb2_x, was_clicked)
 
     def rgb2hls(self, was_clicked=True):
-        return self.set_image("rgb2hls", filters.rgb2_x, was_clicked)
+        return self.set_image(self.rgb_image, "rgb2hls", filters.rgb2_x, was_clicked)
 
     def rgb2hls_full(self, was_clicked=True):
-        return self.set_image("rgb2hls_full", filters.rgb2_x, was_clicked)
+        return self.set_image(self.rgb_image, "rgb2hls_full", filters.rgb2_x, was_clicked)
 
     def rgb2hsv(self, was_clicked=True):
-        return self.set_image("rgb2hsv", filters.rgb2_x, was_clicked)
+        return self.set_image(self.rgb_image, "rgb2hsv", filters.rgb2_x, was_clicked)
 
     def rgb2hsv_full(self, was_clicked=True):
-        return self.set_image("rgb2hsv_full", filters.rgb2_x, was_clicked)
+        return self.set_image(self.rgb_image, "rgb2hsv_full", filters.rgb2_x, was_clicked)
 
     def rgb2lab(self, was_clicked=True):
-        return self.set_image("rgb2lab", filters.rgb2_x, was_clicked)
+        return self.set_image(self.rgb_image, "rgb2lab", filters.rgb2_x, was_clicked)
 
     def rgb2luv(self, was_clicked=True):
-        return self.set_image("rgb2luv", filters.rgb2_x, was_clicked)
+        return self.set_image(self.rgb_image, "rgb2luv", filters.rgb2_x, was_clicked)
 
     def rgb2lab1(self, was_clicked=True):
-        return self.set_image("rgb2lab1", filters.rgb2_x, was_clicked)
+        return self.set_image(self.rgb_image, "rgb2lab1", filters.rgb2_x, was_clicked)
 
     def rgb2luv1(self, was_clicked=True):
-        return self.set_image("rgb2luv1", filters.rgb2_x, was_clicked)
+        return self.set_image(self.rgb_image, "rgb2luv1", filters.rgb2_x, was_clicked)
 
     def rgb2rgba(self, was_clicked=True):
-        return self.set_image("rgb2rgba", filters.rgb2_x, was_clicked)
+        return self.set_image(self.rgb_image, "rgb2rgba", filters.rgb2_x, was_clicked)
 
     def rgb2xyz(self, was_clicked=True):
-        return self.set_image("rgb2xyz", filters.rgb2_x, was_clicked)
+        return self.set_image(self.rgb_image, "rgb2xyz", filters.rgb2_x, was_clicked)
 
     def rgb2ycr_cb(self, was_clicked=True):
-        return self.set_image("rgb2ycr_cb", filters.rgb2_x, was_clicked)
+        return self.set_image(self.rgb_image, "rgb2ycr_cb", filters.rgb2_x, was_clicked)
 
     def rgb2ycr_cb1(self, was_clicked=True):
-        return self.set_image("rgb2ycr_cb1", filters.rgb2_x, was_clicked)
+        return self.set_image(self.rgb_image, "rgb2ycr_cb1", filters.rgb2_x, was_clicked)
 
     def rgb2ycr_yuv(self, was_clicked=True):
-        return self.set_image("rgb2ycr_yuv", filters.rgb2_x, was_clicked)
+        return self.set_image(self.rgb_image, "rgb2ycr_yuv", filters.rgb2_x, was_clicked)
 
     def rgb2yuv_i420(self, was_clicked=True):
-        return self.set_image("rgb2yuv_i420", filters.rgb2_x, was_clicked)
+        return self.set_image(self.rgb_image, "rgb2yuv_i420", filters.rgb2_x, was_clicked)
 
     def rgb2yuv_iyuv(self, was_clicked=True):
-        return self.set_image("rgb2yuv_iyuv", filters.rgb2_x, was_clicked)
+        return self.set_image(self.rgb_image, "rgb2yuv_iyuv", filters.rgb2_x, was_clicked)
 
     def rgb2yv12(self, was_clicked=True):
-        return self.set_image("rgb2yv12", filters.rgb2_x, was_clicked)
+        return self.set_image(self.rgb_image, "rgb2yv12", filters.rgb2_x, was_clicked)
 
-    """bgr2_x"""
-    def bgr2hsv(self, was_clicked=True):
-        return self.set_image("bgr2hsv", filters.bgr2_x, was_clicked)
-
+    """bgr2_x filters"""
     def bgr2rgb(self, was_clicked=True):
-        return self.set_image("bgr2rgb", filters.bgr2_x, was_clicked)
+        return self.set_image(self.bgr_image, "bgr2rgb", filters.bgr2_x, was_clicked)
+
+    def bgr2bgr555(self, was_clicked=True):
+        return self.set_image(self.rgb_image, "bgr2bgr555", filters.bgr2_x, was_clicked)
+
+    def bgr2bgr565(self, was_clicked=True):
+        return self.set_image(self.rgb_image, "bgr2bgr565", filters.bgr2_x, was_clicked)
+
+    def bgr2bgra(self, was_clicked=True):
+        return self.set_image(self.rgb_image, "bgr2bgra", filters.bgr2_x, was_clicked)
+
+    def bgr2gray(self, was_clicked=True):
+        return self.set_image(self.rgb_image, "bgr2gray", filters.bgr2_x, was_clicked)
+
+    def bgr2hls(self, was_clicked=True):
+        return self.set_image(self.rgb_image, "bgr2hls", filters.bgr2_x, was_clicked)
+
+    def bgr2hls_full(self, was_clicked=True):
+        return self.set_image(self.rgb_image, "bgr2hls_full", filters.bgr2_x, was_clicked)
+
+    def bgr2hsv(self, was_clicked=True):
+        return self.set_image(self.rgb_image, "bgr2hsv", filters.bgr2_x, was_clicked)
+
+    def bgr2hsv_full(self, was_clicked=True):
+        return self.set_image(self.rgb_image, "bgr2hsv_full", filters.bgr2_x, was_clicked)
 
     def bgr2lab(self, was_clicked=True):
-        return self.set_image("bgr2lab", filters.bgr2_x, was_clicked)
+        return self.set_image(self.rgb_image, "bgr2lab", filters.bgr2_x, was_clicked)
+
+    def bgr2luv(self, was_clicked=True):
+        return self.set_image(self.rgb_image, "bgr2luv", filters.bgr2_x, was_clicked)
+
+    def bgr2lab1(self, was_clicked=True):
+        return self.set_image(self.rgb_image, "bgr2lab1", filters.bgr2_x, was_clicked)
+
+    def bgr2luv1(self, was_clicked=True):
+        return self.set_image(self.rgb_image, "bgr2luv1", filters.bgr2_x, was_clicked)
+
+    def bgr2xyz(self, was_clicked=True):
+        return self.set_image(self.rgb_image, "bgr2xyz", filters.bgr2_x, was_clicked)
+
+    def bgr2ycr_cb(self, was_clicked=True):
+        return self.set_image(self.rgb_image, "bgr2ycr_cb", filters.bgr2_x, was_clicked)
+
+    def bgr2ycr_cb1(self, was_clicked=True):
+        return self.set_image(self.rgb_image, "bgr2ycr_cb1", filters.bgr2_x, was_clicked)
+
+    def bgr2ycr_yuv(self, was_clicked=True):
+        return self.set_image(self.rgb_image, "bgr2ycr_yuv", filters.bgr2_x, was_clicked)
+
+    def bgr2yuv_i420(self, was_clicked=True):
+        return self.set_image(self.rgb_image, "bgr2yuv_i420", filters.bgr2_x, was_clicked)
+
+    def bgr2yuv_iyuv(self, was_clicked=True):
+        return self.set_image(self.rgb_image, "bgr2yuv_iyuv", filters.bgr2_x, was_clicked)
+
+    def bgr2yv12(self, was_clicked=True):
+        return self.set_image(self.rgb_image, "bgr2yv12", filters.bgr2_x, was_clicked)
 
     # def test_cf(self, was_clicked=True):
     #     # if was_clicked:
