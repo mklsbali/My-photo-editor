@@ -2,8 +2,11 @@ import cython
 import numpy as np
 
 @cython.boundscheck(False)
-cpdef unsigned char[:, :, :] test_filter(unsigned char [:, :, :] image, int r, int g, int b):
-    cdef int width, height, i, j, k, c
+cpdef unsigned char[:, :, :] test_filter(unsigned char [:, :, :] image, rgb):
+    cdef int width, height, i, j, k, c, r, g, b
+    r = rgb[2]
+    g = rgb[1]
+    b = rgb[0]
     rgb_color = (r, g, b)
     width = image.shape[1]
     height = image.shape[0]

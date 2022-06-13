@@ -87,5 +87,5 @@ def bgr2yv12(image):
 
 
 if __name__ == '__main__':
-    flags = [i for i in dir(cv) if i.startswith('COLOR_BGR2')]
+    flags = [i for i in dir(cv) if i.startswith('COLOR_')]
     print(flags)

@@ -4,6 +4,7 @@ from PyQt5.QtGui import QPixmap
 import ctypes as c
 import numpy as np
 
+
 def convert_cv_qt_pixmap(cv_img):
     """Convert from an opencv image to QPixmap"""
     rgb_image = cv.cvtColor(cv_img, cv.COLOR_BGR2RGB)
@@ -23,6 +24,14 @@ def uint8_to_npy(src, height, width):
     array = np.ctypeslib.as_array(ptr, shape=(height, width, 3))
     return array
 
+
 def uint8_to_npy1(src):
     return np.asarray(src, dtype=np.ubyte)
 
+
+def split_image(image):
+    return cv.split(image)
+
+
+def merge_image(r, g, b):
+    return cv.merge([r, g, b])

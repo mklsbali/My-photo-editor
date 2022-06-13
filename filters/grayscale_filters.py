@@ -1,6 +1,6 @@
 import cv2 as cv
 import numpy as np
-from utils.cv_utils import hex_to_rgb_color
+import utils.cv_utils as cv_utils
 
 
 def gray_scale_image(image):
@@ -18,12 +18,8 @@ def b_w_image(image):
     return b_w_im
 
 
-def a(image):
-    return cv.cvtColor(image, cv.COLOR_RGB2YCrCb)
-
-
 def test_filter(image, hex_color):
-    rgb_color = hex_to_rgb_color(hex_color[1:])
+    rgb_color = cv_utils.hex_to_rgb_color(hex_color[1:])
     print(type(image))
     width = image.shape[1]
     height = image.shape[0]

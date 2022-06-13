@@ -85,6 +85,6 @@ def rgb2yv12(image):
     return cv.cvtColor(image, cv.COLOR_RGB2YUV_YV12)
 
 
-# if __name__ == '__main__':
-#     flags = [i for i in dir(cv) if i.startswith('COLOR_RGB2')]
-#     print(flags)
+if __name__ == '__main__':
+    flags = [i for i in dir(cv) if i.startswith('COLOR')]
+    print(flags)
