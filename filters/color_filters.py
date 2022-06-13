@@ -19,3 +19,21 @@ def cython_filter(image, color):
     filtered = cv_filters_c.test_filter(image, color)
     return cv_utils.uint8_to_npy1(filtered)
 
+
+def change_red_image(image, value):
+    blue, green, red = cv_utils.split_image(image)
+    red = (red+value) % 255
+    print(red[0])
+    return cv.merge([blue, green, red])
+
+
+def change_green_image(image, value):
+    blue, green, red = cv_utils.split_image(image)
+    green = (green+value) % 255
+    return cv.merge([blue, green, red])
+
+
+def change_blue_image(image, value):
+    blue, green, red = cv_utils.split_image(image)
+    blue = (blue+value) % 255
+    return cv.merge([blue, green, red])

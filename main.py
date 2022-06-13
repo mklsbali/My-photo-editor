@@ -11,7 +11,7 @@ from utils import cv_utils
 import styles.styles as styles
 import cv2 as cv
 import filters.grayscale_filters
-import filters.color_filters
+import filters.color_filters as color_filters
 import filters.rgb2_x
 import filters.bgr2_x
 import cv_filters_c
@@ -68,7 +68,9 @@ class App(QWidget):
         self.red_slider_value = QLabel()
         self.green_slider_value = QLabel()
         self.blue_slider_value = QLabel()
-
+        self.r_image = cv.imread(self.selected_image_path)
+        self.g_image = cv.imread(self.selected_image_path)
+        self.b_image = cv.imread(self.selected_image_path)
         self.init_ui()
 
     def init_ui(self):
@@ -156,8 +158,8 @@ class App(QWidget):
         slider_text.setText("Red")
         self.red_slider = QSlider(Qt.Horizontal)
         self.red_slider.setMinimumWidth(170)
-        self.red_slider.setMinimum(-127)
-        self.red_slider.setMaximum(127)
+        self.red_slider.setMinimum(0)
+        self.red_slider.setMaximum(255)
         self.red_slider.setSingleStep(1)
         self.red_slider_value.setText("       0")
         self.red_slider.valueChanged.connect(self.red_slider_change)
@@ -174,8 +176,8 @@ class App(QWidget):
         slider_text.setMinimumWidth(50)
         self.green_slider = QSlider(Qt.Horizontal)
         self.green_slider.setMinimumWidth(170)
-        self.green_slider.setMinimum(-127)
-        self.green_slider.setMaximum(127)
+        self.green_slider.setMinimum(0)
+        self.green_slider.setMaximum(255)
         self.green_slider.setSingleStep(1)
         self.green_slider_value.setText("       0")
         self.green_slider.valueChanged.connect(self.green_slider_change)
@@ -192,8 +194,8 @@ class App(QWidget):
         slider_text.setMinimumWidth(50)
         self.blue_slider = QSlider(Qt.Horizontal)
         self.blue_slider.setMinimumWidth(170)
-        self.blue_slider.setMinimum(-127)
-        self.blue_slider.setMaximum(127)
+        self.blue_slider.setMinimum(0)
+        self.blue_slider.setMaximum(255)
         self.blue_slider.setSingleStep(1)
         self.blue_slider_value.setText("       0")
         self.blue_slider.valueChanged.connect(self.blue_slider_change)
@@ -203,12 +205,21 @@ class App(QWidget):
 
     def red_slider_change(self):
         self.red_slider_value.setText("       "+str(self.red_slider.value()))
+        updated_image = color_filters.change_red_image(self.rgb_image, self.red_slider.value())
+        self.load_cv_image(updated_image)
+        self.tmp_image = updated_image
 
     def green_slider_change(self):
         self.green_slider_value.setText("       "+str(self.green_slider.value()))
+        updated_image = color_filters.change_green_image(self.rgb_image, self.green_slider.value())
+        self.load_cv_image(updated_image)
+        self.tmp_image = updated_image
 
     def blue_slider_change(self):
         self.blue_slider_value.setText("       "+str(self.blue_slider.value()))
+        updated_image = color_filters.change_blue_image(self.rgb_image, self.blue_slider.value())
+        self.load_cv_image(updated_image)
+        self.tmp_image = updated_image
 
     def init_main_label2(self):
         """Filters"""
@@ -377,6 +388,7 @@ class App(QWidget):
             self.selected_image_path = image_select_window[0]
             self.selected_image = cv.imread(self.selected_image_path)
             self.rgb_image = self.selected_image
+            self.tmp_image = self.selected_image
             self.bgr_image = filters.rgb2_x.rgb2bgr(self.rgb_image)
             self.load_image_from_path()
 
@@ -481,13 +493,13 @@ class App(QWidget):
         return self.set_image(self.rgb_image, "b_w_image", filters.grayscale_filters, was_clicked)
     """color filters"""
     def red_image(self, was_clicked=True):
-        return self.set_image(self.rgb_image, "red_image", filters.color_filters, was_clicked)
+        return self.set_image(self.rgb_image, "red_image", color_filters, was_clicked)
 
     def green_image(self, was_clicked=True):
-        return self.set_image(self.rgb_image, "green_image", filters.color_filters, was_clicked)
+        return self.set_image(self.rgb_image, "green_image", color_filters, was_clicked)
 
     def blue_image(self, was_clicked=True):
-        return self.set_image(self.rgb_image, "blue_image", filters.color_filters, was_clicked)
+        return self.set_image(self.rgb_image, "blue_image", color_filters, was_clicked)
     """rgb2_x filters"""
     def rgb2bgr(self, was_clicked=True):
         return self.set_image(self.rgb_image, "rgb2bgr", filters.rgb2_x, was_clicked)
@@ -616,7 +628,7 @@ class App(QWidget):
     """"""
     def test_cython_filter(self, was_clicked=True):
         rgb_color = cv_utils.hex_to_rgb_color(self.color[1:])
-        return self.set_image_with_arguments(self.rgb_image, "cython_filter", filters.color_filters, args=rgb_color, was_clicked=was_clicked)
+        return self.set_image_with_arguments(self.rgb_image, "cython_filter", color_filters, args=rgb_color, was_clicked=was_clicked)
 
     def apply_filter_image(self, f_name, function):
         f_path = os.path.join('styles', 'filter_images', f_name+'.png')
