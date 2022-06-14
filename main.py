@@ -72,6 +72,9 @@ class App(QWidget):
         self.g_image = cv.imread(self.selected_image_path)
         self.b_image = cv.imread(self.selected_image_path)
         self.init_ui()
+        self.r_s_values = [0]
+        self.g_s_values = [0]
+        self.b_s_values = [0]
 
     def init_ui(self):
         # Init main window
@@ -204,22 +207,22 @@ class App(QWidget):
         slider_layout.addWidget(self.blue_slider_value)
 
     def red_slider_change(self):
+        self.r_s_values.append(self.red_slider.value())
         self.red_slider_value.setText("       "+str(self.red_slider.value()))
-        updated_image = color_filters.change_red_image(self.rgb_image, self.red_slider.value())
-        self.load_cv_image(updated_image)
-        self.tmp_image = updated_image
+        self.tmp_image = color_filters.change_red_image(self.tmp_image, self.r_s_values[-1]-self.r_s_values[-2])
+        self.load_cv_image(self.tmp_image)
 
     def green_slider_change(self):
+        self.g_s_values.append(self.green_slider.value())
         self.green_slider_value.setText("       "+str(self.green_slider.value()))
-        updated_image = color_filters.change_green_image(self.rgb_image, self.green_slider.value())
-        self.load_cv_image(updated_image)
-        self.tmp_image = updated_image
+        self.tmp_image = color_filters.change_green_image(self.tmp_image, self.g_s_values[-1]-self.g_s_values[-2])
+        self.load_cv_image(self.tmp_image)
 
     def blue_slider_change(self):
+        self.b_s_values.append(self.blue_slider.value())
         self.blue_slider_value.setText("       "+str(self.blue_slider.value()))
-        updated_image = color_filters.change_blue_image(self.rgb_image, self.blue_slider.value())
-        self.load_cv_image(updated_image)
-        self.tmp_image = updated_image
+        self.tmp_image = color_filters.change_blue_image(self.tmp_image, self.b_s_values[-1]-self.b_s_values[-2])
+        self.load_cv_image(self.tmp_image)
 
     def init_main_label2(self):
         """Filters"""

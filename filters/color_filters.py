@@ -1,4 +1,6 @@
 import cv2 as cv
+import numpy as np
+
 import utils.cv_utils as cv_utils
 import cv_filters_c
 
@@ -22,18 +24,17 @@ def cython_filter(image, color):
 
 def change_red_image(image, value):
     blue, green, red = cv_utils.split_image(image)
-    red = (red+value) % 255
-    print(red[0])
+    red = cv.add(red, value)
     return cv.merge([blue, green, red])
 
 
 def change_green_image(image, value):
     blue, green, red = cv_utils.split_image(image)
-    green = (green+value) % 255
+    green = cv.add(green, value)
     return cv.merge([blue, green, red])
 
 
 def change_blue_image(image, value):
     blue, green, red = cv_utils.split_image(image)
-    blue = (blue+value) % 255
+    blue = cv.add(blue, value)
     return cv.merge([blue, green, red])
