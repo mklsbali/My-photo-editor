@@ -3,6 +3,7 @@ from PyQt5 import QtGui, Qt
 from PyQt5.QtGui import QPixmap
 import ctypes as c
 import numpy as np
+from PIL import Image
 
 
 def convert_cv_qt_pixmap(cv_img):
@@ -35,3 +36,12 @@ def split_image(image):
 
 def merge_image(r, g, b):
     return cv.merge([r, g, b])
+
+
+def cv2pil_image(image):
+    # rgb = cv.cvtColor(image, cv.COLOR_BGR2RGB)
+    return Image.fromarray(image)
+
+
+def pil2cv_image(im_pil):
+    return np.asarray(im_pil)

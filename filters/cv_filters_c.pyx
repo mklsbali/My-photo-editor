@@ -17,8 +17,5 @@ cpdef unsigned char[:, :, :] test_filter(unsigned char [:, :, :] image, rgb):
                 c = (image[j, i, k] + rgb_color[k])%255 / 2
                 image[j, i, k] = c
 
-
-
-
     return image
 

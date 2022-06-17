@@ -12,6 +12,7 @@ import styles.styles as styles
 import cv2 as cv
 import filters.grayscale_filters
 import filters.color_filters as color_filters
+import filters.pillow_filters
 import filters.rgb2_x
 import filters.bgr2_x
 import cv_filters_c
@@ -75,6 +76,7 @@ class App(QWidget):
         self.r_s_values = [0]
         self.g_s_values = [0]
         self.b_s_values = [0]
+        self.slider_history = []
 
     def init_ui(self):
         # Init main window
@@ -206,6 +208,18 @@ class App(QWidget):
         slider_layout.addWidget(self.blue_slider)
         slider_layout.addWidget(self.blue_slider_value)
 
+    def get_last_changed_image(self):
+        if len(self.slider_history) == 0:
+            return self.selected_image
+
+        if self.slider_history[-1] == "red":
+            src = self.r_image
+        elif self.slider_history[-1] == "green":
+            src = self.g_image
+        else:
+            src = self.b_image
+        return src
+
     def red_slider_change(self):
         self.r_s_values.append(self.red_slider.value())
         self.red_slider_value.setText("       "+str(self.red_slider.value()))
@@ -250,11 +264,16 @@ class App(QWidget):
         # BGR2_X filters button
         bgr2x_filters_b = QPushButton("BGR2_X")
         bgr2x_filters_b.clicked.connect(self.reload_bgr2x_filters)
+        # Pillow filters button
+        pillow_b = QPushButton("Pillow")
+        pillow_b.clicked.connect(self.reload_pillow_filter)
+
         filter_type_layout.addWidget(filter_type_text)
         filter_type_layout.addWidget(grayscale_filters_b)
         filter_type_layout.addWidget(color_filters_b)
         filter_type_layout.addWidget(rgb2x_filters_b)
         filter_type_layout.addWidget(bgr2x_filters_b)
+        filter_type_layout.addWidget(pillow_b)
         self.filter_container = QWidget(self.main_label2)
         self.filter_container.setObjectName("filter_container")
         self.filter_container.resize(int(self.main_label2.width()), int(self.main_label2.height() * 0.85))
@@ -298,6 +317,9 @@ class App(QWidget):
     def reload_bgr2x_filters(self):
         self.reload_filters(self.load_bgr2_x_filters, "Reload bgr2x filters")
 
+    def reload_pillow_filter(self):
+        self.reload_filters(self.load_pillow_filters, "Reload pillow filters")
+
     def setup_scroll_content(self):
         self.scroll_content = QWidget(self.scroll)
         self.scroll_layout = QHBoxLayout(self.scroll_content)
@@ -311,7 +333,13 @@ class App(QWidget):
         self.add_filter("Negative", self.set_negative_image)
         # # Black and white filter
         self.add_filter("B_W",  self.set_b_w_image)
+        self.scroll.setWidget(self.scroll_content)  # !!!important
 
+    def load_pillow_filters(self):
+        self.setup_scroll_content()
+        self.add_filter("Contour", self.contour)
+        self.add_filter("Blur", self.blur)
+        self.add_filter("Rank", self.max_f)
         self.scroll.setWidget(self.scroll_content)  # !!!important
 
     def load_color_filters(self):
@@ -628,6 +656,15 @@ class App(QWidget):
     def bgr2yv12(self, was_clicked=True):
         return self.set_image(self.rgb_image, "bgr2yv12", filters.bgr2_x, was_clicked)
 
+    """PIL"""
+    def contour(self, was_clicked=True):
+        return self.set_image(self.rgb_image, "contour", filters.pillow_filters, was_clicked)
+
+    def blur(self, was_clicked=True):
+        return self.set_image(self.rgb_image, "blur", filters.pillow_filters, was_clicked)
+
+    def max_f(self, was_clicked=True):
+        return self.set_image(self.rgb_image, "max_f", filters.pillow_filters, was_clicked)
     """"""
     def test_cython_filter(self, was_clicked=True):
         rgb_color = cv_utils.hex_to_rgb_color(self.color[1:])

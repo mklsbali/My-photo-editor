@@ -2387,7 +2387,7 @@ static __Pyx_memviewslice __pyx_f_7filters_12cv_filters_c_test_filter(__Pyx_memv
  *                 c = (image[j, i, k] + rgb_color[k])%255 / 2
  *                 image[j, i, k] = c             # <<<<<<<<<<<<<<
  * 
- * 
+ *     return image
  */
         __pyx_t_15 = __pyx_v_j;
         __pyx_t_14 = __pyx_v_i;
@@ -2400,8 +2400,8 @@ static __Pyx_memviewslice __pyx_f_7filters_12cv_filters_c_test_filter(__Pyx_memv
     }
   }
 
-  /* "filters/cv_filters_c.pyx":23
- * 
+  /* "filters/cv_filters_c.pyx":20
+ *                 image[j, i, k] = c
  * 
  *     return image             # <<<<<<<<<<<<<<
  * 
