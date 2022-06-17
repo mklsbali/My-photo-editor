@@ -409,23 +409,22 @@ class App(QWidget):
         self.add_filter("Blur", self.blur)
         self.add_filter("Max", self.max_filter)
         self.add_filter("Min", self.min_filter)
-        self.add_filter("Box blur", self.box_blur)
+        # self.add_filter("Box blur", self.box_blur)
         self.add_filter("Mask", self.usp_mask)
-        self.add_filter("Builtin", self.builtin_filter)
-        self.add_filter("3D lut", self.c3d_lut)
+        # self.add_filter("Builtin", self.builtin_filter)
+        # self.add_filter("3D lut", self.c3d_lut)
         self.add_filter("Detail", self.detail)
-        self.add_filter("Edge enhance", self.edge_enhance)
-        self.add_filter("Edge enhance more", self.edge_enhance_more)
-        self.add_filter("Find edges", self.find_edges)
+        self.add_filter("Enhance", self.edge_enhance)
+        self.add_filter("Enhance_m", self.edge_enhance_more)
+        self.add_filter("Edges", self.find_edges)
         self.add_filter("Gaussian", self.gaussian_blur)
-        self.add_filter("Kernel", self.kernel)
+        # self.add_filter("Kernel", self.kernel)
         self.add_filter("Median", self.median)
         self.add_filter("Mode", self.mode_filter)
-        self.add_filter("Multi", self.multi_band_filter)
         self.add_filter("Sharpen", self.sharpen)
-        self.add_filter("Multi", self.multi_band_filter)
+        # self.add_filter("Multi", self.multi_band_filter)
         self.add_filter("Smooth", self.smooth)
-        self.add_filter("Smooth more", self.smooth_more)
+        self.add_filter("Smooth m", self.smooth_more)
         self.scroll.setWidget(self.scroll_content)  # !!!important
 
     def select_image(self):
@@ -728,6 +727,9 @@ class App(QWidget):
 
     def multi_band_filter(self, was_clicked=True):
         return self.set_image(self.rgb_image, "multi_band_filter", filters.pillow_filters, was_clicked)
+
+    def sharpen(self, was_clicked=True):
+        return self.set_image(self.rgb_image, "sharpen", filters.pillow_filters, was_clicked)
 
     def smooth(self, was_clicked=True):
         return self.set_image(self.rgb_image, "smooth", filters.pillow_filters, was_clicked)
