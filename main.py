@@ -335,13 +335,6 @@ class App(QWidget):
         self.add_filter("B_W",  self.set_b_w_image)
         self.scroll.setWidget(self.scroll_content)  # !!!important
 
-    def load_pillow_filters(self):
-        self.setup_scroll_content()
-        self.add_filter("Contour", self.contour)
-        self.add_filter("Blur", self.blur)
-        self.add_filter("Rank", self.max_f)
-        self.scroll.setWidget(self.scroll_content)  # !!!important
-
     def load_color_filters(self):
         self.setup_scroll_content()
 
@@ -409,6 +402,31 @@ class App(QWidget):
         # self.add_filter('bgr2yv12', self.bgr2yv12)
 
         self.scroll.setWidget(self.scroll_content)
+
+    def load_pillow_filters(self):
+        self.setup_scroll_content()
+        self.add_filter("Contour", self.contour)
+        self.add_filter("Blur", self.blur)
+        self.add_filter("Max", self.max_filter)
+        self.add_filter("Min", self.min_filter)
+        self.add_filter("Box blur", self.box_blur)
+        self.add_filter("Mask", self.usp_mask)
+        self.add_filter("Builtin", self.builtin_filter)
+        self.add_filter("3D lut", self.c3d_lut)
+        self.add_filter("Detail", self.detail)
+        self.add_filter("Edge enhance", self.edge_enhance)
+        self.add_filter("Edge enhance more", self.edge_enhance_more)
+        self.add_filter("Find edges", self.find_edges)
+        self.add_filter("Gaussian", self.gaussian_blur)
+        self.add_filter("Kernel", self.kernel)
+        self.add_filter("Median", self.median)
+        self.add_filter("Mode", self.mode_filter)
+        self.add_filter("Multi", self.multi_band_filter)
+        self.add_filter("Sharpen", self.sharpen)
+        self.add_filter("Multi", self.multi_band_filter)
+        self.add_filter("Smooth", self.smooth)
+        self.add_filter("Smooth more", self.smooth_more)
+        self.scroll.setWidget(self.scroll_content)  # !!!important
 
     def select_image(self):
         # Image select window
@@ -663,8 +681,61 @@ class App(QWidget):
     def blur(self, was_clicked=True):
         return self.set_image(self.rgb_image, "blur", filters.pillow_filters, was_clicked)
 
-    def max_f(self, was_clicked=True):
-        return self.set_image(self.rgb_image, "max_f", filters.pillow_filters, was_clicked)
+    def min_filter(self, was_clicked=True):
+        return self.set_image(self.rgb_image, "min_filter", filters.pillow_filters, was_clicked)
+
+    def max_filter(self, was_clicked=True):
+        return self.set_image(self.rgb_image, "max_filter", filters.pillow_filters, was_clicked)
+
+    def box_blur(self, was_clicked=True):
+        return self.set_image(self.rgb_image, "box_blur", filters.pillow_filters, was_clicked)
+
+    def usp_mask(self, was_clicked=True):
+        return self.set_image(self.rgb_image, "usp_mask", filters.pillow_filters, was_clicked)
+
+    def builtin_filter(self, was_clicked=True):
+        return self.set_image(self.rgb_image, "builtin_filter", filters.pillow_filters, was_clicked)
+
+    def c3d_lut(self, was_clicked=True):
+        return self.set_image(self.rgb_image, "c3d_lut", filters.pillow_filters, was_clicked)
+
+    def detail(self, was_clicked=True):
+        return self.set_image(self.rgb_image, "detail", filters.pillow_filters, was_clicked)
+
+    def edge_enhance(self, was_clicked=True):
+        return self.set_image(self.rgb_image, "edge_enhance", filters.pillow_filters, was_clicked)
+
+    def edge_enhance_more(self, was_clicked=True):
+        return self.set_image(self.rgb_image, "edge_enhance_more", filters.pillow_filters, was_clicked)
+
+    def emboss(self, was_clicked=True):
+        return self.set_image(self.rgb_image, "emboss", filters.pillow_filters, was_clicked)
+
+    def find_edges(self, was_clicked=True):
+        return self.set_image(self.rgb_image, "find_edges", filters.pillow_filters, was_clicked)
+
+    def gaussian_blur(self, was_clicked=True):
+        return self.set_image(self.rgb_image, "gaussian_blur", filters.pillow_filters, was_clicked)
+
+    def kernel(self, was_clicked=True):
+        return self.set_image(self.rgb_image, "kernel", filters.pillow_filters, was_clicked)
+
+    def median(self, was_clicked=True):
+        return self.set_image(self.rgb_image, "median", filters.pillow_filters, was_clicked)
+
+    def mode_filter(self, was_clicked=True):
+        return self.set_image(self.rgb_image, "mode_filter", filters.pillow_filters, was_clicked)
+
+    def multi_band_filter(self, was_clicked=True):
+        return self.set_image(self.rgb_image, "multi_band_filter", filters.pillow_filters, was_clicked)
+
+    def smooth(self, was_clicked=True):
+        return self.set_image(self.rgb_image, "smooth", filters.pillow_filters, was_clicked)
+
+    def smooth_more(self, was_clicked=True):
+        return self.set_image(self.rgb_image, "smooth_more", filters.pillow_filters, was_clicked)
+
+
     """"""
     def test_cython_filter(self, was_clicked=True):
         rgb_color = cv_utils.hex_to_rgb_color(self.color[1:])
