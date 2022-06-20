@@ -63,13 +63,13 @@ class App(QWidget):
         self.bgr_image = cv.imread(self.selected_image_path)
         self.color = "#FFAABB"
         self.cp_button = QPushButton()
-        self.red_slider = QSlider()
-        self.green_slider = QSlider()
-        self.blue_slider = QSlider()
+        self.red_slider = QSlider(Qt.Horizontal)
+        self.green_slider = QSlider(Qt.Horizontal)
+        self.blue_slider = QSlider(Qt.Horizontal)
         self.red_slider_value = QLabel()
         self.green_slider_value = QLabel()
         self.blue_slider_value = QLabel()
-        self.r_image = cv.imread(self.selected_image_path)
+        self.r_image = color_filters.red_image(self.selected_image)
         self.g_image = cv.imread(self.selected_image_path)
         self.b_image = cv.imread(self.selected_image_path)
         self.init_ui()
@@ -154,59 +154,27 @@ class App(QWidget):
         cp_layout.addWidget(self.cp_button)
 
         # Red slider
+        self.add_slider(self.red_slider, self.red_slider_value, 0.01, 0.20, self.red_slider_change, "Red")
+        self.add_slider(self.green_slider, self.green_slider_value, 0.01, 0.30, self.green_slider_change, "Green")
+        self.add_slider(self.blue_slider, self.blue_slider_value, 0.01, 0.40, self.blue_slider_change, "Blue")
+
+    def add_slider(self, s, s_value, pos_x, pos_y, function, text):
         r_slider_container = QWidget(self.main_label3)
-        r_slider_container.move(int(self.main_label1.width()*0.01), int(self.main_label1.height()*0.20))
+        r_slider_container.move(int(self.main_label1.width()*pos_x), int(self.main_label1.height()*pos_y))
         slider_layout = QHBoxLayout()
         r_slider_container.setLayout(slider_layout)
         slider_text = QLabel()
         slider_text.setMinimumWidth(50)
-        slider_text.setText("Red")
-        self.red_slider = QSlider(Qt.Horizontal)
-        self.red_slider.setMinimumWidth(170)
-        self.red_slider.setMinimum(0)
-        self.red_slider.setMaximum(255)
-        self.red_slider.setSingleStep(1)
-        self.red_slider_value.setText("       0")
-        self.red_slider.valueChanged.connect(self.red_slider_change)
+        slider_text.setText(text)
+        s.setMinimumWidth(170)
+        s.setMinimum(0)
+        s.setMaximum(255)
+        s.setSingleStep(1)
+        s_value.setText("       0")
+        s.valueChanged.connect(function)
         slider_layout.addWidget(slider_text)
-        slider_layout.addWidget(self.red_slider)
-        slider_layout.addWidget(self.red_slider_value)
-        # Green slider
-        g_slider_container = QWidget(self.main_label3)
-        g_slider_container.move(int(self.main_label1.width()*0.01), int(self.main_label1.height()*0.30))
-        slider_layout = QHBoxLayout()
-        g_slider_container.setLayout(slider_layout)
-        slider_text = QLabel()
-        slider_text.setText("Green")
-        slider_text.setMinimumWidth(50)
-        self.green_slider = QSlider(Qt.Horizontal)
-        self.green_slider.setMinimumWidth(170)
-        self.green_slider.setMinimum(0)
-        self.green_slider.setMaximum(255)
-        self.green_slider.setSingleStep(1)
-        self.green_slider_value.setText("       0")
-        self.green_slider.valueChanged.connect(self.green_slider_change)
-        slider_layout.addWidget(slider_text)
-        slider_layout.addWidget(self.green_slider)
-        slider_layout.addWidget(self.green_slider_value)
-        # Blue slider
-        b_slider_container = QWidget(self.main_label3)
-        b_slider_container.move(int(self.main_label1.width()*0.01), int(self.main_label1.height()*0.40))
-        slider_layout = QHBoxLayout()
-        b_slider_container.setLayout(slider_layout)
-        slider_text = QLabel()
-        slider_text.setText("Blue")
-        slider_text.setMinimumWidth(50)
-        self.blue_slider = QSlider(Qt.Horizontal)
-        self.blue_slider.setMinimumWidth(170)
-        self.blue_slider.setMinimum(0)
-        self.blue_slider.setMaximum(255)
-        self.blue_slider.setSingleStep(1)
-        self.blue_slider_value.setText("       0")
-        self.blue_slider.valueChanged.connect(self.blue_slider_change)
-        slider_layout.addWidget(slider_text)
-        slider_layout.addWidget(self.blue_slider)
-        slider_layout.addWidget(self.blue_slider_value)
+        slider_layout.addWidget(s)
+        slider_layout.addWidget(s_value)
 
     def get_last_changed_image(self):
         if len(self.slider_history) == 0:
@@ -221,18 +189,26 @@ class App(QWidget):
         return src
 
     def red_slider_change(self):
+        if self.red_slider.value() == 0 and self.green_slider.value() == 0 and self.blue_slider.value() == 0:
+            self.tmp_image = self.selected_image
         self.r_s_values.append(self.red_slider.value())
         self.red_slider_value.setText("       "+str(self.red_slider.value()))
         self.tmp_image = color_filters.change_red_image(self.tmp_image, self.r_s_values[-1]-self.r_s_values[-2])
         self.load_cv_image(self.tmp_image)
+        if self.red_slider.value() == 0 and self.green_slider.value() == 0 and self.blue_slider.value() == 0:
+            self.load_cv_image(self.selected_image)
 
     def green_slider_change(self):
+        if self.red_slider.value() == 0 and self.green_slider.value() == 0 and self.blue_slider.value() == 0:
+            self.tmp_image = self.selected_image
         self.g_s_values.append(self.green_slider.value())
         self.green_slider_value.setText("       "+str(self.green_slider.value()))
         self.tmp_image = color_filters.change_green_image(self.tmp_image, self.g_s_values[-1]-self.g_s_values[-2])
         self.load_cv_image(self.tmp_image)
 
     def blue_slider_change(self):
+        if self.red_slider.value() == 0 and self.green_slider.value() == 0 and self.blue_slider.value() == 0:
+            self.tmp_image = self.selected_image
         self.b_s_values.append(self.blue_slider.value())
         self.blue_slider_value.setText("       "+str(self.blue_slider.value()))
         self.tmp_image = color_filters.change_blue_image(self.tmp_image, self.b_s_values[-1]-self.b_s_values[-2])
@@ -338,7 +314,7 @@ class App(QWidget):
     def load_color_filters(self):
         self.setup_scroll_content()
 
-        self.add_filter("test_cython", self.test_cython_filter)
+        # self.add_filter("test_cython", self.test_cython_filter)
         self.add_filter("red", self.red_image)
         self.add_filter("green", self.green_image)
         self.add_filter("blue", self.blue_image)
