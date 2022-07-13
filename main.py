@@ -10,7 +10,7 @@ import utils
 from utils import cv_utils
 import styles.styles as styles
 import cv2 as cv
-import filters.grayscale_filters
+import filters.grayscale_filters as grayscale_filters
 import filters.color_filters as color_filters
 import filters.pillow_filters
 import filters.rgb2_x
@@ -66,9 +66,11 @@ class App(QWidget):
         self.red_slider = QSlider(Qt.Horizontal)
         self.green_slider = QSlider(Qt.Horizontal)
         self.blue_slider = QSlider(Qt.Horizontal)
+        self.threshold_slider = QSlider(Qt.Horizontal)
         self.red_slider_value = QLabel()
         self.green_slider_value = QLabel()
         self.blue_slider_value = QLabel()
+        self.threshold_slider_value = QLabel()
         self.r_image = color_filters.red_image(self.selected_image)
         self.g_image = cv.imread(self.selected_image_path)
         self.b_image = cv.imread(self.selected_image_path)
@@ -141,7 +143,7 @@ class App(QWidget):
 
         # Color picker
         cp_container = QWidget(self.main_label3)
-        cp_container.move(int(self.main_label1.width()*0.01), int(self.main_label1.height()*0.07))
+        cp_container.move(int(self.main_label1.width()*0.01), int(self.main_label1.height()*0.1))
         cp_layout = QHBoxLayout()
         cp_container.setLayout(cp_layout)
         cp_text = QLabel()
@@ -153,12 +155,13 @@ class App(QWidget):
         cp_layout.addWidget(cp_text)
         cp_layout.addWidget(self.cp_button)
 
-        # Red slider
-        self.add_slider(self.red_slider, self.red_slider_value, 0.01, 0.20, self.red_slider_change, "Red")
-        self.add_slider(self.green_slider, self.green_slider_value, 0.01, 0.30, self.green_slider_change, "Green")
-        self.add_slider(self.blue_slider, self.blue_slider_value, 0.01, 0.40, self.blue_slider_change, "Blue")
+        # Sliders
+        self.add_slider(self.red_slider, self.red_slider_value, 0.01, 0.2, self.red_slider_change, "Red")
+        self.add_slider(self.green_slider, self.green_slider_value, 0.01, 0.3, self.green_slider_change, "Green")
+        self.add_slider(self.blue_slider, self.blue_slider_value, 0.01, 0.4, self.blue_slider_change, "Blue")
+        self.add_slider(self.threshold_slider, self.threshold_slider_value, 0.01, 0.5, self.threshold_slider_change, "T-hold", default_value=127)
 
-    def add_slider(self, s, s_value, pos_x, pos_y, function, text):
+    def add_slider(self, s, s_value, pos_x, pos_y, function, text, default_value=0):
         r_slider_container = QWidget(self.main_label3)
         r_slider_container.move(int(self.main_label1.width()*pos_x), int(self.main_label1.height()*pos_y))
         slider_layout = QHBoxLayout()
@@ -169,8 +172,9 @@ class App(QWidget):
         s.setMinimumWidth(170)
         s.setMinimum(0)
         s.setMaximum(255)
+        s.setValue(default_value)
         s.setSingleStep(1)
-        s_value.setText("       0")
+        s_value.setText("       "+str(default_value))
         s.valueChanged.connect(function)
         slider_layout.addWidget(slider_text)
         slider_layout.addWidget(s)
@@ -213,6 +217,11 @@ class App(QWidget):
         self.blue_slider_value.setText("       "+str(self.blue_slider.value()))
         self.tmp_image = color_filters.change_blue_image(self.tmp_image, self.b_s_values[-1]-self.b_s_values[-2])
         self.load_cv_image(self.tmp_image)
+
+    def threshold_slider_change(self):
+        self.tmp_image = grayscale_filters.b_w_image(self.rgb_image, self.threshold_slider.value())
+        self.load_cv_image(self.tmp_image)
+        self.threshold_slider_value.setText("       "+str(self.threshold_slider.value()))
 
     def init_main_label2(self):
         """Filters"""
@@ -514,6 +523,8 @@ class App(QWidget):
         return self.set_image(self.rgb_image, "negative_image", filters.grayscale_filters, was_clicked)
 
     def set_b_w_image(self, was_clicked=True):
+        self.threshold_slider.setValue(127)
+        self.threshold_slider_value.setText("       "+str(self.threshold_slider.value()))
         return self.set_image(self.rgb_image, "b_w_image", filters.grayscale_filters, was_clicked)
     """color filters"""
     def red_image(self, was_clicked=True):
